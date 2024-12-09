@@ -1,0 +1,11 @@
+services:
+
+  regulations_database:
+    image: postgres:14.15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "5433:5432"
