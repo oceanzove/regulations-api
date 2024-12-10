@@ -9,7 +9,7 @@
     "server_port": "25504",
     "jwt_secret_key": "key"
   },
-  "reglaments-database": {
+  "regulations-database": {
     "db_host": "localhost",
     "db_port": "5433",
     "db_username": "postgres",

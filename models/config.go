@@ -1,15 +1,16 @@
 package models
 
 type ConfigService struct {
-	Server     ServerConfig     `json:"server" binding:"required"`
-	BusinessDB BusinessDBConfig `json:"reglaments-database" binding:"required"`
+	Server        ServerConfig        `json:"server" binding:"required"`
+	RegulationsDB RegulationsDBConfig `json:"regulations-database" binding:"required"`
 }
 
 type ServerConfig struct {
-	Port string `json:"server_port" binding:"required"`
+	Port         string `json:"server_port" binding:"required"`
+	JWTSecretKey string `json:"jwt_secret_key" binding:"requires"`
 }
 
-type BusinessDBConfig struct {
+type RegulationsDBConfig struct {
 	Host     string `json:"db_host" binding:"required"`
 	Port     string `json:"db_port" binding:"required"`
 	Username string `json:"db_username" binding:"required"`
