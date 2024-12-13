@@ -36,3 +36,13 @@ func (u *Usecase) SignIn(input *models.SignInInput) (*models.SignInOutput, Error
 
 	return output, Success
 }
+
+func (u *Usecase) ParseToken(token string) (*models.JWTClaims, ErrorCode) {
+	claims, err := u.services.JWTToken.ParseToken(token)
+	if err != nil {
+		logrus.Error(err)
+		return nil, InternalServerError
+	}
+
+	return claims, Success
+}

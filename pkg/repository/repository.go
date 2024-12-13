@@ -16,14 +16,21 @@ type Account interface {
 	Get(email string) (*models.Account, error)
 }
 
+type Regulation interface {
+	GetPrivate(email string) (*models.GetRegulationsOutput, error)
+	UpdatePrivate(input models.UpdateRegulationInput, email string) error
+}
+
 type Repository struct {
 	Account
 	Auth
+	Regulation
 }
 
 func NewRepository(sources *Sources) *Repository {
 	return &Repository{
-		Account: NewAccountPostgres(sources.BusinessDB),
-		Auth:    NewAuthPostgres(sources.BusinessDB),
+		Account:    NewAccountPostgres(sources.BusinessDB),
+		Auth:       NewAuthPostgres(sources.BusinessDB),
+		Regulation: NewRegulationPostgres(sources.BusinessDB),
 	}
 }
