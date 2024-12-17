@@ -6,6 +6,22 @@ import (
 	"regulations-api/pkg/usecase"
 )
 
+func (h *Handler) createRegulation(c *gin.Context) {
+	email := c.GetString(gin.AuthUserKey)
+	if email == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	output, processStatus := h.usecase.CreateRegulation(email)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, output, processStatus)
+}
+
 func (h *Handler) getRegulations(c *gin.Context) {
 	email := c.GetString(gin.AuthUserKey)
 	if email == "" {

@@ -21,6 +21,10 @@ func NewRegulationService(repo repository.Regulation) *RegulationService {
 //	return o.repo.Get(input)
 //}
 
+func (o *RegulationService) Create(email string) (*models.CreateRegulationOutput, error) {
+	return o.repo.Create(email)
+}
+
 func (o *RegulationService) GetPrivate(email string) (*models.GetRegulationsOutput, error) {
 	return o.repo.GetPrivate(email)
 }

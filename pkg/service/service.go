@@ -16,6 +16,7 @@ type Auth interface {
 type Regulation interface {
 	GetPrivate(email string) (*models.GetRegulationsOutput, error)
 	UpdatePrivate(input models.UpdateRegulationInput, email string) error
+	Create(email string) (*models.CreateRegulationOutput, error)
 }
 
 type JWTToken interface {

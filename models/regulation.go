@@ -15,3 +15,9 @@ type UpdateRegulationInput struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
+
+type CreateRegulationOutput struct {
+	ID      string
+	Title   string `json:"title"`
+	Content string `json:"content"`
+}

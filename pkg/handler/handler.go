@@ -49,6 +49,7 @@ func (h *Handler) InitHTTPRoutes(config *models.ServerConfig) *gin.Engine {
 		{
 			regulation.GET("", h.getRegulations)
 			regulation.PUT("/:regulationID", h.updateRegulation)
+			regulation.POST("", h.createRegulation)
 		}
 	}
 

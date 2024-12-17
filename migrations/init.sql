@@ -11,11 +11,27 @@ CREATE TABLE "Account" (
 
 -- Таблица с регламентами
 CREATE TABLE "Regulation" (
-                              "id" SERIAL PRIMARY KEY, -- Уникальный идентификатор регламента
-                              "title" VARCHAR NOT NULL, -- Название регламента
-                              "content" TEXT, -- Содержимое регламента
-                              "account_email" VARCHAR NOT NULL REFERENCES "Account"("email") ON DELETE CASCADE -- Привязка к аккаунту
+                              "id" SERIAL PRIMARY KEY,
+                              "title" VARCHAR NOT NULL,
+                              "content" TEXT,
+                              "account_email" VARCHAR NOT NULL REFERENCES "Account"("email") ON DELETE CASCADE,
+                              "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+                              "updated_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Триггер для автоматического обновления столбца updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+    RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_regulation_updated_at
+    BEFORE UPDATE ON "Regulation"
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
 -- Вставляем данные в таблицу Role
 INSERT INTO "Role" ("name") VALUES
