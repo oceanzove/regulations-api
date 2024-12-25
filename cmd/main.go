@@ -48,7 +48,7 @@ func main() {
 		logrus.Fatalf(err.Error())
 		return
 	}
-	logrus.Info("load local config success")
+	logrus.Info("load local configs success")
 
 	var serverInstance server.Server
 
