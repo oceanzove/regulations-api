@@ -13,13 +13,19 @@ func (h *Handler) createProcess(c *gin.Context) {
 		return
 	}
 
-	output, processStatus := h.usecase.CreateProcess(email)
+	var input *models.CreateProcessInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+
+	processStatus := h.usecase.CreateProcess(email, input)
 	if processStatus != usecase.Success {
 		h.sendResponseSuccess(c, nil, processStatus)
 		return
 	}
 
-	h.sendResponseSuccess(c, output, processStatus)
+	h.sendResponseSuccess(c, nil, processStatus)
 }
 
 func (h *Handler) getProcesses(c *gin.Context) {

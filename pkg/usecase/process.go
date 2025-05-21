@@ -5,14 +5,14 @@ import (
 	"regulations-api/models"
 )
 
-func (u *Usecase) CreateProcess(email string) (*models.CreateProcessOutput, ErrorCode) {
-	output, err := u.services.Process.Create(email)
+func (u *Usecase) CreateProcess(email string, input *models.CreateProcessInput) ErrorCode {
+	err := u.services.Process.Create(email, input)
 	if err != nil {
 		logrus.Error(err)
-		return nil, InternalServerError
+		return InternalServerError
 	}
 
-	return output, Success
+	return Success
 }
 
 func (u *Usecase) GetProcesses(email string) (*models.GetProcessesOutput, ErrorCode) {

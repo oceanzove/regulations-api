@@ -21,7 +21,7 @@ CREATE TABLE "Regulation" (
 
 -- Таблица с процессами
 CREATE TABLE "Process" (
-                           "id" SERIAL PRIMARY KEY,
+                           "id" uuid PRIMARY KEY,
                            "title" VARCHAR NOT NULL,
                            "description" TEXT,
                            "regulation_id" INT REFERENCES "Regulation"("id"),

@@ -16,7 +16,7 @@ const (
 )
 
 const (
-	AccessTokenTTL  = time.Minute * 15
+	AccessTokenTTL  = time.Minute * 60
 	RefreshTokenTTL = time.Hour * 24 * 7
 )
 

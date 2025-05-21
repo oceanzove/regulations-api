@@ -25,7 +25,7 @@ type Regulation interface {
 type Process interface {
 	GetPrivate(email string) (*models.GetProcessesOutput, error)
 	UpdatePrivate(input models.UpdateProcessInput, email string) error
-	Create(email string) (*models.CreateProcessOutput, error)
+	Create(email string, input *models.CreateProcessInput) error
 }
 
 type Repository struct {

@@ -13,8 +13,8 @@ func NewProcessService(repo repository.Process) *ProcessService {
 	return &ProcessService{repo: repo}
 }
 
-func (o *ProcessService) Create(email string) (*models.CreateProcessOutput, error) {
-	return o.repo.Create(email)
+func (o *ProcessService) Create(email string, input *models.CreateProcessInput) error {
+	return o.repo.Create(email, input)
 }
 
 func (o *ProcessService) GetPrivate(email string) (*models.GetProcessesOutput, error) {
