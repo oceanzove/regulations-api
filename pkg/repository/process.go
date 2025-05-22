@@ -74,7 +74,7 @@ func (t *ProcessPostgres) GetPrivate(email string) (*models.GetProcessesOutput, 
 	return &output, nil
 }
 
-func (t *ProcessPostgres) UpdatePrivate(input models.UpdateProcessInput, email string) error {
+func (t *ProcessPostgres) UpdatePrivate(input *models.UpdateProcessInput, email string) error {
 	_, err := t.db.Exec(`UPDATE "Process" SET title = $1, description = $2 WHERE  id = $3 AND account_email = $4`, input.Title, input.Description, input.ID, email)
 	if err != nil {
 		logrus.Error(err.Error())

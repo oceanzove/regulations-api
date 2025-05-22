@@ -45,7 +45,7 @@ func (h *Handler) getProcesses(c *gin.Context) {
 }
 
 func (h *Handler) updateProcess(c *gin.Context) {
-	var input models.UpdateProcessInput
+	var input *models.UpdateProcessInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		h.sendResponseSuccess(c, nil, usecase.BadRequest)
 		return

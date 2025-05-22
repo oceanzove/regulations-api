@@ -24,8 +24,12 @@ type Regulation interface {
 
 type Process interface {
 	GetPrivate(email string) (*models.GetProcessesOutput, error)
-	UpdatePrivate(input models.UpdateProcessInput, email string) error
+	UpdatePrivate(input *models.UpdateProcessInput, email string) error
 	Create(email string, input *models.CreateProcessInput) error
+}
+
+type Step interface {
+	CreateSteps(input *models.CreateStepsInput) error
 }
 
 type Repository struct {
@@ -33,6 +37,7 @@ type Repository struct {
 	Auth
 	Regulation
 	Process
+	Step
 }
 
 func NewRepository(sources *Sources) *Repository {
@@ -41,5 +46,6 @@ func NewRepository(sources *Sources) *Repository {
 		Auth:       NewAuthPostgres(sources.BusinessDB),
 		Regulation: NewRegulationPostgres(sources.BusinessDB),
 		Process:    NewProcessPostgres(sources.BusinessDB),
+		Step:       NewStepPostgres(sources.BusinessDB),
 	}
 }

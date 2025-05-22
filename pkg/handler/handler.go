@@ -57,6 +57,10 @@ func (h *Handler) InitHTTPRoutes(config *models.ServerConfig) *gin.Engine {
 			process.PUT("/:processID", h.updateProcess)
 			process.POST("", h.createProcess)
 		}
+		step := api.Group("/step", h.UserIdentityMiddleware)
+		{
+			step.POST("", h.createSteps)
+		}
 	}
 
 	return router

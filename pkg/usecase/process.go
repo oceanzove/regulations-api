@@ -25,7 +25,7 @@ func (u *Usecase) GetProcesses(email string) (*models.GetProcessesOutput, ErrorC
 	return output, Success
 }
 
-func (u *Usecase) UpdateProcess(input models.UpdateProcessInput, email string) ErrorCode {
+func (u *Usecase) UpdateProcess(input *models.UpdateProcessInput, email string) ErrorCode {
 	err := u.services.Process.UpdatePrivate(input, email)
 	if err != nil {
 		logrus.Error(err)

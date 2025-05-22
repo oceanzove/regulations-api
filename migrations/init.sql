@@ -32,11 +32,12 @@ CREATE TABLE "Process" (
 
 -- Таблица с шагами для процессов
 CREATE TABLE "Step" (
-                        "id" SERIAL PRIMARY KEY,
+                        "id" uuid PRIMARY KEY,
                         "name" VARCHAR NOT NULL,
                         "description" TEXT,
+                        "responsible" VARCHAR,
                         "process_id" INT REFERENCES "Process"("id") ON DELETE CASCADE,
-                        "order" INT NOT NULL CHECK ("order" > 0)
+                        "order" INT NOT NULL
 );
 
 -- Триггер для автоматического обновления столбца updated_at

@@ -21,6 +21,6 @@ func (o *ProcessService) GetPrivate(email string) (*models.GetProcessesOutput, e
 	return o.repo.GetPrivate(email)
 }
 
-func (o *ProcessService) UpdatePrivate(input models.UpdateProcessInput, email string) error {
+func (o *ProcessService) UpdatePrivate(input *models.UpdateProcessInput, email string) error {
 	return o.repo.UpdatePrivate(input, email)
 }

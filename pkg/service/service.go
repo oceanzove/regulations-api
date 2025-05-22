@@ -21,8 +21,12 @@ type Regulation interface {
 
 type Process interface {
 	GetPrivate(email string) (*models.GetProcessesOutput, error)
-	UpdatePrivate(input models.UpdateProcessInput, email string) error
+	UpdatePrivate(input *models.UpdateProcessInput, email string) error
 	Create(email string, input *models.CreateProcessInput) error
+}
+
+type Step interface {
+	Create(input *models.CreateStepsInput) error
 }
 
 type JWTToken interface {
@@ -37,6 +41,7 @@ type Service struct {
 	Regulation
 	Process
 	JWTToken
+	Step
 }
 
 func NewService(repos *repository.Repository, config *models.ConfigService) *Service {
@@ -46,5 +51,6 @@ func NewService(repos *repository.Repository, config *models.ConfigService) *Ser
 		JWTToken:   NewJWTTokenService(config.Server),
 		Regulation: NewRegulationService(repos.Regulation),
 		Process:    NewProcessService(repos.Process),
+		Step:       NewStepService(repos.Step),
 	}
 }
