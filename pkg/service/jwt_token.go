@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"regulations-api/models"
+	"strings"
 	"time"
 )
 
@@ -61,6 +62,38 @@ func (s *JWTTokenService) GenerateRefreshToken(email string) (string, error) {
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(getSecretKey(s.config))
+}
+
+func (s *JWTTokenService) GenerateAccessFromRefresh(refreshToken string) (string, error) {
+	if strings.HasPrefix(refreshToken, "Bearer ") {
+		refreshToken = strings.TrimPrefix(refreshToken, "Bearer ")
+		refreshToken = strings.TrimSpace(refreshToken)
+		logrus.Infof("Stripped 'Bearer ' from token, now: %v", refreshToken)
+	}
+
+	claims, err := s.ParseToken(refreshToken)
+	if err != nil {
+		logrus.Error("Failed to parse refresh token:", err)
+		return "", err
+	}
+
+	if claims.TokenType != "refresh" {
+		logrus.Error("Received token is not of type 'refresh', token type: ", claims.TokenType)
+		return "", errors.New("incorrect token type")
+	}
+
+	if time.Now().UTC().After(claims.ExpiresAt.Time) {
+		logrus.Error("Refresh token is expired.")
+		return "", errors.New("refresh token is expired")
+	}
+
+	accessToken, err := s.GenerateAccessToken(claims.Email)
+	if err != nil {
+		logrus.Error("Error generating access token:", err)
+		return "", err
+	}
+
+	return accessToken, nil
 }
 
 func (s *JWTTokenService) ParseToken(tokenString string) (*models.JWTClaims, error) {

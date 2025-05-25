@@ -32,6 +32,7 @@ type Step interface {
 type JWTToken interface {
 	GenerateAccessToken(email string) (string, error)
 	GenerateRefreshToken(email string) (string, error)
+	GenerateAccessFromRefresh(email string) (string, error)
 	ParseToken(tokenString string) (*models.JWTClaims, error)
 }
 

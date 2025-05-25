@@ -44,6 +44,7 @@ func (h *Handler) InitHTTPRoutes(config *models.ServerConfig) *gin.Engine {
 		auth := api.Group("/auth")
 		{
 			auth.POST("/sign-in", h.signIn)
+			auth.POST("/refresh", h.refresh)
 		}
 		regulation := api.Group("/regulation", h.UserIdentityMiddleware)
 		{
