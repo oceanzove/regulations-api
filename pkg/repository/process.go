@@ -46,14 +46,15 @@ func (t *ProcessPostgres) Create(accountId string, input *models.CreateProcessIn
 	// 3. Используем ID и описание из input
 	id := input.ID
 	description := input.Description
+	responsible := input.Responsible
 
 	// 4. Вставляем новый процесс в таблицу
 	var newProcessID string
 	err = t.db.Get(&newProcessID, `
-		INSERT INTO "Process" (id, title, description, account_id)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO "Process" (id, title, description, account_id, responsible)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id
-	`, id, title, description, accountId)
+	`, id, title, description, accountId, responsible)
 	if err != nil {
 		logrus.Error("Error while inserting new input: ", err.Error())
 		return err

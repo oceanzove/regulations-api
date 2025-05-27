@@ -31,6 +31,7 @@ type CreateProcessInput struct {
 	ID          string `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	Responsible string `json:"responsible"`
 }
 
 type CreateProcessOutput struct {
