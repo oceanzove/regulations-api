@@ -64,7 +64,7 @@ func (h *Handler) UserIdentityMiddleware(c *gin.Context) {
 		return
 	}
 
-	setUserContext(c, claims.Email)
+	setUserContext(c, claims.ID)
 
 	c.Next()
 }
@@ -97,8 +97,8 @@ func (h *Handler) GetJWTClaims(c *gin.Context) (*models.JWTClaims, error) {
 	return claims, nil
 }
 
-func setUserContext(c *gin.Context, email string) {
-	c.Set(gin.AuthUserKey, email)
+func setUserContext(c *gin.Context, id string) {
+	c.Set(gin.AuthUserKey, id)
 }
 
 func (h *Handler) DEPRECATED(c *gin.Context) {

@@ -14,15 +14,20 @@ type Auth interface {
 }
 
 type Regulation interface {
-	GetPrivate(email string) (*models.GetRegulationsOutput, error)
-	UpdatePrivate(input models.UpdateRegulationInput, email string) error
-	Create(email string) (*models.CreateRegulationOutput, error)
+	GetPrivate(accountId string) (*models.GetRegulationsOutput, error)
+	UpdatePrivate(input models.UpdateRegulationInput, accountId string) error
+	Create(accountId string, input *models.CreateRegulationInput) error
 }
 
 type Process interface {
-	GetPrivate(email string) (*models.GetProcessesOutput, error)
-	UpdatePrivate(input *models.UpdateProcessInput, email string) error
-	Create(email string, input *models.CreateProcessInput) error
+	GetPrivate(accountId string) (*models.GetProcessesOutput, error)
+	GetByID(accountId string, processId string) (*models.Process, error)
+	UpdatePrivate(input *models.UpdateProcessInput, accountId string) error
+	Create(accountId string, input *models.CreateProcessInput) error
+	LinkRegulationToProcess(accountId string, processId string) error
+	GetStepsByProcess(processId string) ([]*models.Step, error)
+	GetRegulationsByProcess(processId string) ([]*models.Regulation, error)
+	CreateStep(input *models.Step) error
 }
 
 type Step interface {
@@ -30,8 +35,8 @@ type Step interface {
 }
 
 type JWTToken interface {
-	GenerateAccessToken(email string) (string, error)
-	GenerateRefreshToken(email string) (string, error)
+	GenerateAccessToken(account *models.Account) (string, error)
+	GenerateRefreshToken(account *models.Account) (string, error)
 	GenerateAccessFromRefresh(email string) (string, error)
 	ParseToken(tokenString string) (*models.JWTClaims, error)
 }
@@ -49,9 +54,8 @@ func NewService(repos *repository.Repository, config *models.ConfigService) *Ser
 	return &Service{
 		Account:    NewAccountService(repos.Account),
 		Auth:       NewAuthService(repos.Auth),
-		JWTToken:   NewJWTTokenService(config.Server),
+		JWTToken:   NewJWTTokenService(config.Server, repos.Account),
 		Regulation: NewRegulationService(repos.Regulation),
 		Process:    NewProcessService(repos.Process),
-		Step:       NewStepService(repos.Step),
 	}
 }

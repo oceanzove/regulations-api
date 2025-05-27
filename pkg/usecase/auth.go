@@ -17,13 +17,13 @@ func (u *Usecase) SignIn(input *models.SignInInput) (*models.SignInOutput, Error
 		return nil, InternalServerError
 	}
 
-	accessToken, err := u.services.JWTToken.GenerateAccessToken(account.Email)
+	accessToken, err := u.services.JWTToken.GenerateAccessToken(account)
 	if err != nil {
 		logrus.Error("ошибка генерации Access токена: ", err)
 		return nil, InternalServerError
 	}
 
-	refreshToken, err := u.services.JWTToken.GenerateRefreshToken(account.Email)
+	refreshToken, err := u.services.JWTToken.GenerateRefreshToken(account)
 	if err != nil {
 		logrus.Error("ошибка генерации Refresh токена: ", err)
 		return nil, InternalServerError

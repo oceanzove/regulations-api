@@ -11,6 +11,15 @@ type AccountPostgres struct {
 	db *sqlx.DB
 }
 
+func (r *AccountPostgres) GetByID(id string) (*models.Account, error) {
+	var account models.Account
+	if err := r.db.Get(&account, `SELECT * FROM "Account" WHERE id=$1`, id); err != nil {
+		logrus.Error(err.Error())
+		return nil, clerr.ErrorServer
+	}
+	return &account, nil
+}
+
 func NewAccountPostgres(db *sqlx.DB) *AccountPostgres {
 	return &AccountPostgres{db: db}
 }

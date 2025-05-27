@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"regulations-api/models"
 )
@@ -15,41 +16,56 @@ func NewRegulationPostgres(db *sqlx.DB) *RegulationPostgres {
 	return &RegulationPostgres{db: db}
 }
 
-func (t *RegulationPostgres) Create(email string) (*models.CreateRegulationOutput, error) {
+func (t *RegulationPostgres) Create(accountId string, input *models.CreateRegulationInput) error {
+	if input == nil {
+		err := errors.New("input is nil")
+		logrus.Error(err, err.Error())
+		return err
+	}
+
+	if input.ID == "" {
+		err := errors.New("input ID is required")
+		logrus.Error(err, err.Error())
+		return err
+	}
+
 	// 1. Получаем количество существующих регламентов для данного пользователя.
 	var count int
-	err := t.db.Get(&count, `SELECT COUNT(*) FROM "Regulation" WHERE account_email = $1`, email)
+	err := t.db.Get(&count, `SELECT COUNT(*) FROM "Regulation" WHERE account_id = $1`, accountId)
 	if err != nil {
 		logrus.Error("Error while counting regulations: ", err.Error())
-		return nil, err
+		return err
 	}
 
-	// 2. Генерируем новое название регламента
-	title := "Регламент " + fmt.Sprintf("%d", count+1)
+	// 2. Генерируем название, если не задано
+	title := input.Title
+	if title == "" {
+		title = fmt.Sprintf("Регламент %d", count+1)
+	}
 
-	// 3. Вставляем новый регламент в таблицу
+	// 3. Используем ID и content из input
+	id := input.ID
+	content := input.Content
+
+	// 4. Вставляем новый регламент в таблицу
 	var newRegulationID string
-	err = t.db.Get(&newRegulationID, `INSERT INTO "Regulation" (title, content, account_email)
-        VALUES ($1, '', $2) RETURNING id`, title, email)
+	err = t.db.Get(&newRegulationID, `
+        INSERT INTO "Regulation" (id, title, content, account_id)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id
+    `, id, title, content, accountId)
 	if err != nil {
 		logrus.Error("Error while inserting new regulation: ", err.Error())
-		return nil, err
+		return err
 	}
 
-	// 4. Формируем и возвращаем результат
-	output := &models.CreateRegulationOutput{
-		ID:      newRegulationID,
-		Title:   title,
-		Content: "",
-	}
-
-	return output, nil
+	return nil
 }
 
-func (t *RegulationPostgres) GetPrivate(email string) (*models.GetRegulationsOutput, error) {
+func (t *RegulationPostgres) GetPrivate(accountId string) (*models.GetRegulationsOutput, error) {
 	var output models.GetRegulationsOutput
 
-	err := t.db.Select(&output.Regulations, `SELECT id, title, content FROM "Regulation" WHERE  account_email = $1`, email)
+	err := t.db.Select(&output.Regulations, `SELECT id, title, content FROM "Regulation" WHERE  account_id = $1`, accountId)
 	if err != nil {
 		logrus.Error(err.Error())
 		return nil, err
@@ -59,7 +75,7 @@ func (t *RegulationPostgres) GetPrivate(email string) (*models.GetRegulationsOut
 }
 
 func (t *RegulationPostgres) UpdatePrivate(input models.UpdateRegulationInput, email string) error {
-	_, err := t.db.Exec(`UPDATE "Regulation" SET title = $1, content = $2 WHERE  id = $3 AND account_email = $4`, input.Title, input.Content, input.ID, email)
+	_, err := t.db.Exec(`UPDATE "Regulation" SET title = $1, content = $2 WHERE  id = $3 AND account_id = $4`, input.Title, input.Content, input.ID, email)
 	if err != nil {
 		logrus.Error(err.Error())
 		return err

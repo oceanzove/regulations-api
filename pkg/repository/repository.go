@@ -14,18 +14,24 @@ type Auth interface {
 
 type Account interface {
 	Get(email string) (*models.Account, error)
+	GetByID(id string) (*models.Account, error)
 }
 
 type Regulation interface {
 	GetPrivate(email string) (*models.GetRegulationsOutput, error)
 	UpdatePrivate(input models.UpdateRegulationInput, email string) error
-	Create(email string) (*models.CreateRegulationOutput, error)
+	Create(email string, input *models.CreateRegulationInput) error
 }
 
 type Process interface {
-	GetPrivate(email string) (*models.GetProcessesOutput, error)
-	UpdatePrivate(input *models.UpdateProcessInput, email string) error
-	Create(email string, input *models.CreateProcessInput) error
+	GetPrivate(accountId string) (*models.GetProcessesOutput, error)
+	GetByID(accountId string, processId string) (*models.Process, error)
+	UpdatePrivate(input *models.UpdateProcessInput, accountId string) error
+	Create(accountId string, input *models.CreateProcessInput) error
+	LinkRegulationToProcess(accountId string, processId string) error
+	CreateStep(input *models.Step) error
+	GetStepsByProcess(processId string) ([]*models.Step, error)
+	GetRegulationsByProcess(processId string) ([]*models.Regulation, error)
 }
 
 type Step interface {
@@ -46,6 +52,5 @@ func NewRepository(sources *Sources) *Repository {
 		Auth:       NewAuthPostgres(sources.BusinessDB),
 		Regulation: NewRegulationPostgres(sources.BusinessDB),
 		Process:    NewProcessPostgres(sources.BusinessDB),
-		Step:       NewStepPostgres(sources.BusinessDB),
 	}
 }

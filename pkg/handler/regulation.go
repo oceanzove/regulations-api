@@ -7,29 +7,35 @@ import (
 )
 
 func (h *Handler) createRegulation(c *gin.Context) {
-	email := c.GetString(gin.AuthUserKey)
-	if email == "" {
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
 		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
 		return
 	}
 
-	output, processStatus := h.usecase.CreateRegulation(email)
+	var input *models.CreateRegulationInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+
+	processStatus := h.usecase.CreateRegulation(accountId, input)
 	if processStatus != usecase.Success {
 		h.sendResponseSuccess(c, nil, processStatus)
 		return
 	}
 
-	h.sendResponseSuccess(c, output, processStatus)
+	h.sendResponseSuccess(c, nil, processStatus)
 }
 
 func (h *Handler) getRegulations(c *gin.Context) {
-	email := c.GetString(gin.AuthUserKey)
-	if email == "" {
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
 		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
 		return
 	}
 
-	output, processStatus := h.usecase.GetRegulation(email)
+	output, processStatus := h.usecase.GetRegulation(accountId)
 	if processStatus != usecase.Success {
 		h.sendResponseSuccess(c, nil, processStatus)
 		return
@@ -48,13 +54,13 @@ func (h *Handler) updateRegulation(c *gin.Context) {
 	regulationID := c.Param("regulationID")
 	input.ID = regulationID
 
-	email := c.GetString(gin.AuthUserKey)
-	if email == "" {
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
 		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
 		return
 	}
 
-	processStatus := h.usecase.UpdateRegulation(input, email)
+	processStatus := h.usecase.UpdateRegulation(input, accountId)
 	if processStatus != usecase.Success {
 		h.sendResponseSuccess(c, nil, processStatus)
 		return

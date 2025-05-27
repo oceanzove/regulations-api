@@ -21,16 +21,16 @@ func NewRegulationService(repo repository.Regulation) *RegulationService {
 //	return o.repo.Get(input)
 //}
 
-func (o *RegulationService) Create(email string) (*models.CreateRegulationOutput, error) {
-	return o.repo.Create(email)
+func (o *RegulationService) Create(accountId string, input *models.CreateRegulationInput) error {
+	return o.repo.Create(accountId, input)
 }
 
-func (o *RegulationService) GetPrivate(email string) (*models.GetRegulationsOutput, error) {
-	return o.repo.GetPrivate(email)
+func (o *RegulationService) GetPrivate(accountId string) (*models.GetRegulationsOutput, error) {
+	return o.repo.GetPrivate(accountId)
 }
 
-func (o *RegulationService) UpdatePrivate(input models.UpdateRegulationInput, email string) error {
-	return o.repo.UpdatePrivate(input, email)
+func (o *RegulationService) UpdatePrivate(input models.UpdateRegulationInput, accountId string) error {
+	return o.repo.UpdatePrivate(input, accountId)
 }
 
 //func (o *OfferService) Create(input *models.OfferCreateInput, email string) (*models.OfferCreateOutput, error) {

@@ -16,7 +16,7 @@ func NewProcessPostgres(db *sqlx.DB) *ProcessPostgres {
 	return &ProcessPostgres{db: db}
 }
 
-func (t *ProcessPostgres) Create(email string, input *models.CreateProcessInput) error {
+func (t *ProcessPostgres) Create(accountId string, input *models.CreateProcessInput) error {
 	if input == nil {
 		err := errors.New("input input is nil")
 		logrus.Error(err, err.Error())
@@ -31,7 +31,7 @@ func (t *ProcessPostgres) Create(email string, input *models.CreateProcessInput)
 
 	// 1. Получаем количество существующих регламентов для данного пользователя.
 	var count int
-	err := t.db.Get(&count, `SELECT COUNT(*) FROM "Process" WHERE account_email = $1`, email)
+	err := t.db.Get(&count, `SELECT COUNT(*) FROM "Process" WHERE account_id = $1`, accountId)
 	if err != nil {
 		logrus.Error("Error while counting input: ", err.Error())
 		return err
@@ -50,10 +50,10 @@ func (t *ProcessPostgres) Create(email string, input *models.CreateProcessInput)
 	// 4. Вставляем новый процесс в таблицу
 	var newProcessID string
 	err = t.db.Get(&newProcessID, `
-		INSERT INTO "Process" (id, title, description, account_email)
+		INSERT INTO "Process" (id, title, description, account_id)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id
-	`, id, title, description, email)
+	`, id, title, description, accountId)
 	if err != nil {
 		logrus.Error("Error while inserting new input: ", err.Error())
 		return err
@@ -62,10 +62,10 @@ func (t *ProcessPostgres) Create(email string, input *models.CreateProcessInput)
 	return nil
 }
 
-func (t *ProcessPostgres) GetPrivate(email string) (*models.GetProcessesOutput, error) {
+func (t *ProcessPostgres) GetPrivate(accountId string) (*models.GetProcessesOutput, error) {
 	var output models.GetProcessesOutput
 
-	err := t.db.Select(&output.Processes, `SELECT id, title, description FROM "Process" WHERE  account_email = $1`, email)
+	err := t.db.Select(&output.Processes, `SELECT id, title, description FROM "Process" WHERE  account_id = $1`, accountId)
 	if err != nil {
 		logrus.Error(err.Error())
 		return nil, err
@@ -74,8 +74,17 @@ func (t *ProcessPostgres) GetPrivate(email string) (*models.GetProcessesOutput, 
 	return &output, nil
 }
 
-func (t *ProcessPostgres) UpdatePrivate(input *models.UpdateProcessInput, email string) error {
-	_, err := t.db.Exec(`UPDATE "Process" SET title = $1, description = $2 WHERE  id = $3 AND account_email = $4`, input.Title, input.Description, input.ID, email)
+func (t *ProcessPostgres) GetByID(accountID, processID string) (*models.Process, error) {
+	var process models.Process
+	err := t.db.Get(&process, `SELECT * FROM "Process" WHERE id=$1 AND account_id=$2`, processID, accountID)
+	if err != nil {
+		return nil, err
+	}
+	return &process, nil
+}
+
+func (t *ProcessPostgres) UpdatePrivate(input *models.UpdateProcessInput, accountId string) error {
+	_, err := t.db.Exec(`UPDATE "Process" SET title = $1, description = $2 WHERE  id = $3 AND account_id = $4`, input.Title, input.Description, input.ID, accountId)
 	if err != nil {
 		logrus.Error(err.Error())
 		return err
@@ -84,31 +93,61 @@ func (t *ProcessPostgres) UpdatePrivate(input *models.UpdateProcessInput, email 
 	return nil
 }
 
-//func (t *OfferPostgres) Create(input *models.OfferCreateInput, email string) (*models.OfferCreateOutput, error) {
-//	var output models.OfferCreateOutput
-//	err := t.db.Get(&output, `INSERT INTO "Offer" (title, description, chapter) VALUES ($1, $2, $3) RETURNING *`, input.Title, input.Description, input.Chapter)
-//	if err != nil {
-//		logrus.Error(err.Error())
-//		return nil, err
-//	}
-//
-//	_, err = t.db.Exec(`INSERT INTO "AccountOffer" (offer, account, is_creator) VALUES ($1, $2, true)`, output.ID, email)
-//	if err != nil {
-//		logrus.Error(err.Error())
-//		return nil, err
-//	}
-//
-//	return &output, nil
-//}
+func (t *ProcessPostgres) LinkRegulationToProcess(processID, regulationID string) error {
+	_, err := t.db.Exec(`
+		INSERT INTO "ProcessRegulation" (process_id, regulation_id)
+		VALUES ($1, $2)
+		ON CONFLICT DO NOTHING
+	`, processID, regulationID)
+	return err
+}
 
-//func (t *OfferPostgres) Get(input *models.OfferGetInput) (*models.OfferGetActiveOutput, error) {
-//	var output models.OfferGetActiveOutput
-//
-//	err := t.db.Select(&output.List, `SELECT id, title, description, status, chapter  FROM "Offer" WHERE status != 'создан'`)
-//	if err != nil {
-//		logrus.Error(err.Error())
-//		return nil, err
-//	}
-//
-//	return &output, nil
-//}
+func (t *ProcessPostgres) CreateStep(input *models.Step) error {
+	if input == nil {
+		return errors.New("input is nil")
+	}
+	_, err := t.db.Exec(`
+		INSERT INTO "Step" (id, name, description, process_id, responsible, "order")
+		VALUES ($1, $2, $3, $4, $5, $6)
+	`, input.ID, input.Title, input.Description, input.ProcessID, input.Responsible, input.Order)
+	return err
+}
+
+func (t *ProcessPostgres) GetStepsByProcess(processID string) ([]*models.Step, error) {
+	var steps []*models.Step
+
+	err := t.db.Select(
+		&steps,
+		`SELECT id, name, description, "order", process_id, responsible
+		 FROM "Step"
+		 WHERE process_id = $1`,
+		processID,
+	)
+
+	if err != nil {
+		logrus.Error("Error while getting steps by process: ", err)
+		return nil, err
+	}
+
+	return steps, nil
+}
+
+func (t *ProcessPostgres) GetRegulationsByProcess(processID string) ([]*models.Regulation, error) {
+	var regulations []*models.Regulation
+
+	err := t.db.Select(
+		&regulations,
+		`SELECT r.id, r.title, r.content
+		 FROM "Regulation" r
+		 JOIN "ProcessRegulation" pr ON pr.regulation_id = r.id
+		 WHERE pr.process_id = $1`,
+		processID,
+	)
+
+	if err != nil {
+		logrus.Error("Error while getting regulations by process: ", err)
+		return nil, err
+	}
+
+	return regulations, nil
+}

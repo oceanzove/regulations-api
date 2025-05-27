@@ -1,14 +1,14 @@
 package models
 
 type Step struct {
-	ID          string `json:"id"`
-	Order       int    `json:"order"`
-	Title       string `json:"title"`
-	ProcessID   string `json:"processId"`
-	Description string `json:"description"`
-	Responsible string `json:"responsible"`
+	ID          string `json:"id" db:"id"`
+	Name        string `json:"name" db:"name"`
+	Order       int    `json:"order" db:"order"`
+	Title       string `json:"title" db:"title"`
+	ProcessID   string `json:"processId" db:"process_id"`
+	Description string `json:"description" db:"description"`
+	Responsible string `json:"responsible" db:"responsible"`
 }
-
 type CreateStepsInput struct {
 	Steps []Step `json:"steps"`
 }

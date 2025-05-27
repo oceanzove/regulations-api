@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"regulations-api/models"
+	"regulations-api/pkg/repository"
 	"strings"
 	"time"
 )
@@ -22,11 +23,15 @@ const (
 )
 
 type JWTTokenService struct {
-	config models.ServerConfig
+	config         models.ServerConfig
+	accountService repository.Account
 }
 
-func NewJWTTokenService(config models.ServerConfig) *JWTTokenService {
-	return &JWTTokenService{config: config}
+func NewJWTTokenService(config models.ServerConfig, accountService repository.Account) *JWTTokenService {
+	return &JWTTokenService{
+		config:         config,
+		accountService: accountService,
+	}
 }
 
 func getSecretKey(config models.ServerConfig) []byte {
@@ -36,9 +41,10 @@ func getSecretKey(config models.ServerConfig) []byte {
 	return []byte(config.JWTSecretKey)
 }
 
-func (s *JWTTokenService) GenerateAccessToken(email string) (string, error) {
+func (s *JWTTokenService) GenerateAccessToken(account *models.Account) (string, error) {
 	claims := models.JWTClaims{
-		Email:     email,
+		ID:        account.ID,
+		Email:     account.Email,
 		TokenType: "access",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(AccessTokenTTL).UTC()),
@@ -50,9 +56,10 @@ func (s *JWTTokenService) GenerateAccessToken(email string) (string, error) {
 	return token.SignedString(getSecretKey(s.config))
 }
 
-func (s *JWTTokenService) GenerateRefreshToken(email string) (string, error) {
+func (s *JWTTokenService) GenerateRefreshToken(account *models.Account) (string, error) {
 	claims := models.JWTClaims{
-		Email:     email,
+		ID:        account.ID,
+		Email:     account.Email,
 		TokenType: "refresh",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(RefreshTokenTTL).UTC()),
@@ -87,7 +94,9 @@ func (s *JWTTokenService) GenerateAccessFromRefresh(refreshToken string) (string
 		return "", errors.New("refresh token is expired")
 	}
 
-	accessToken, err := s.GenerateAccessToken(claims.Email)
+	account, err := s.accountService.GetByID(claims.ID)
+
+	accessToken, err := s.GenerateAccessToken(account)
 	if err != nil {
 		logrus.Error("Error generating access token:", err)
 		return "", err
@@ -122,7 +131,9 @@ func (s *JWTTokenService) RefreshToken(token string) (string, error) {
 		return "", errors.New("refresh токен истёк, требуется повторная аутентификация")
 	}
 
-	newRefreshToken, err := s.GenerateRefreshToken(claims.Email)
+	account, err := s.accountService.GetByID(claims.ID)
+
+	newRefreshToken, err := s.GenerateRefreshToken(account)
 	if err != nil {
 		logrus.Error(err.Error())
 		return "", err
