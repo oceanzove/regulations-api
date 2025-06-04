@@ -19,7 +19,7 @@ func NewRegulationsDatabase(config models.ConfigService, environment models.Envi
 		SSLMode:  config.RegulationsDB.SSLMode,
 	})
 	if err != nil {
-		logrus.Fatalf("failed to initialize business db: %s", err.Error())
+		logrus.Fatalf("failed to initialize regulation db: %s", err.Error())
 	}
 	fmt.Println("database connected")
 	return database
