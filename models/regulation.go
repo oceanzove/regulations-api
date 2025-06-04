@@ -8,8 +8,22 @@ type Regulation struct {
 	CreatedAt string `json:"created_at" db:"created_at"`
 	UpdatedAt string `json:"updated_at" db:"updated_at"`
 }
+
+type Section struct {
+	ID        string `json:"id" db:"id"`
+	Title     string `json:"title" db:"title"`
+	Content   string `json:"content" db:"content"`
+	AccountID string `json:"account_id" db:"account_id"`
+	CreatedAt string `json:"created_at" db:"created_at"`
+	UpdatedAt string `json:"updated_at" db:"updated_at"`
+}
+
 type GetRegulationsOutput struct {
 	Regulations []Regulation `json:"regulations"`
+}
+
+type GetSectionsOutput struct {
+	Sections []Section `json:"sections"`
 }
 
 type UpdateRegulationInput struct {
@@ -23,6 +37,13 @@ type CreateRegulationInput struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
+
+type CreateSectionInput struct {
+	ID      string `json:"id"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
+}
+
 type CreateRegulationOutput struct {
 	ID      string `json:"id"`
 	Title   string `json:"title"`

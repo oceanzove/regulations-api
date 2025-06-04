@@ -53,6 +53,9 @@ func (h *Handler) InitHTTPRoutes(config *models.ServerConfig) *gin.Engine {
 
 			regulation.PUT("/:regulationID", h.updateRegulation)
 			regulation.POST("", h.createRegulation)
+
+			regulation.POST("/section", h.createSection)
+			regulation.GET("/section", h.getSections)
 		}
 		process := api.Group("/process", h.UserIdentityMiddleware)
 		{

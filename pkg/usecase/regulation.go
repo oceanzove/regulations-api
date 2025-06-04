@@ -15,8 +15,28 @@ func (u *Usecase) CreateRegulation(accountId string, input *models.CreateRegulat
 	return Success
 }
 
+func (u *Usecase) CreateSection(accountId string, input *models.CreateSectionInput) ErrorCode {
+	err := u.services.Regulation.CreateSection(accountId, input)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}
+
 func (u *Usecase) GetRegulation(accountId string) (*models.GetRegulationsOutput, ErrorCode) {
 	output, err := u.services.Regulation.GetPrivate(accountId)
+	if err != nil {
+		logrus.Error(err)
+		return nil, InternalServerError
+	}
+
+	return output, Success
+}
+
+func (u *Usecase) GetSections(accountId string) (*models.GetSectionsOutput, ErrorCode) {
+	output, err := u.services.Regulation.GetSections(accountId)
 	if err != nil {
 		logrus.Error(err)
 		return nil, InternalServerError

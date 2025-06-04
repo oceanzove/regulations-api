@@ -28,6 +28,28 @@ func (h *Handler) createRegulation(c *gin.Context) {
 	h.sendResponseSuccess(c, nil, processStatus)
 }
 
+func (h *Handler) createSection(c *gin.Context) {
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	var input *models.CreateSectionInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+
+	processStatus := h.usecase.CreateSection(accountId, input)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, nil, processStatus)
+}
+
 func (h *Handler) getRegulations(c *gin.Context) {
 	accountId := c.GetString(gin.AuthUserKey)
 	if accountId == "" {
@@ -42,6 +64,22 @@ func (h *Handler) getRegulations(c *gin.Context) {
 	}
 
 	h.sendResponseSuccess(c, output, processStatus)
+}
+
+func (h *Handler) getSections(c *gin.Context) {
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	output, sectionStatus := h.usecase.GetSections(accountId)
+	if sectionStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, sectionStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, output, sectionStatus)
 }
 
 func (h *Handler) getRegulationByID(c *gin.Context) {

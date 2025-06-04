@@ -62,6 +62,52 @@ func (t *RegulationPostgres) Create(accountId string, input *models.CreateRegula
 	return nil
 }
 
+func (t *RegulationPostgres) CreateSection(accountId string, input *models.CreateSectionInput) error {
+	if input == nil {
+		err := errors.New("input is nil")
+		logrus.Error(err, err.Error())
+		return err
+	}
+
+	if input.ID == "" {
+		err := errors.New("input ID is required")
+		logrus.Error(err, err.Error())
+		return err
+	}
+
+	// 1. Получаем количество существующих регламентов для данного пользователя.
+	var count int
+	err := t.db.Get(&count, `SELECT COUNT(*) FROM "Section"`)
+	if err != nil {
+		logrus.Error("Error while counting regulations: ", err.Error())
+		return err
+	}
+
+	// 2. Генерируем название, если не задано
+	title := input.Title
+	if title == "" {
+		title = fmt.Sprintf("Секция %d", count+1)
+	}
+
+	// 3. Используем ID и content из input
+	id := input.ID
+	content := input.Content
+
+	// 4. Вставляем новый регламент в таблицу
+	var newSectionID string
+	err = t.db.Get(&newSectionID, `
+        INSERT INTO "Section" (id, title, content, account_id)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id
+    `, id, title, content, accountId)
+	if err != nil {
+		logrus.Error("Error while inserting new section: ", err.Error())
+		return err
+	}
+
+	return nil
+}
+
 func (t *RegulationPostgres) GetByID(accountID, regulationID string) (*models.Regulation, error) {
 	var regulation models.Regulation
 	err := t.db.Get(&regulation, `SELECT * FROM "Regulation" WHERE id=$1 AND account_id=$2`, regulationID, accountID)
@@ -75,6 +121,18 @@ func (t *RegulationPostgres) GetPrivate(accountId string) (*models.GetRegulation
 	var output models.GetRegulationsOutput
 
 	err := t.db.Select(&output.Regulations, `SELECT id, title, content FROM "Regulation" WHERE  account_id = $1`, accountId)
+	if err != nil {
+		logrus.Error(err.Error())
+		return nil, err
+	}
+
+	return &output, nil
+}
+
+func (t *RegulationPostgres) GetSections(accountID string) (*models.GetSectionsOutput, error) {
+	var output models.GetSectionsOutput
+
+	err := t.db.Select(&output.Sections, `SELECT id, title, content FROM "Section"`)
 	if err != nil {
 		logrus.Error(err.Error())
 		return nil, err

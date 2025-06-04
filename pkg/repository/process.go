@@ -110,7 +110,7 @@ func (t *ProcessPostgres) CreateStep(input *models.Step) error {
 	_, err := t.db.Exec(`
 		INSERT INTO "Step" (id, name, description, process_id, responsible, "order")
 		VALUES ($1, $2, $3, $4, $5, $6)
-	`, input.ID, input.Title, input.Description, input.ProcessID, input.Responsible, input.Order)
+	`, input.ID, input.Name, input.Description, input.ProcessID, input.Responsible, input.Order)
 	return err
 }
 

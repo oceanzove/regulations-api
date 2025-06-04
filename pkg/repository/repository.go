@@ -18,10 +18,12 @@ type Account interface {
 }
 
 type Regulation interface {
-	GetPrivate(email string) (*models.GetRegulationsOutput, error)
+	GetPrivate(accountID string) (*models.GetRegulationsOutput, error)
 	GetByID(accountID string, regulationID string) (*models.Regulation, error)
 	UpdatePrivate(input models.UpdateRegulationInput, email string) error
-	Create(email string, input *models.CreateRegulationInput) error
+	Create(accountID string, input *models.CreateRegulationInput) error
+	CreateSection(accountID string, input *models.CreateSectionInput) error
+	GetSections(accountID string) (*models.GetSectionsOutput, error)
 }
 
 type Process interface {

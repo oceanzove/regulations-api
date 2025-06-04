@@ -25,8 +25,16 @@ func (o *RegulationService) Create(accountId string, input *models.CreateRegulat
 	return o.repo.Create(accountId, input)
 }
 
+func (o *RegulationService) CreateSection(accountId string, input *models.CreateSectionInput) error {
+	return o.repo.CreateSection(accountId, input)
+}
+
 func (o *RegulationService) GetPrivate(accountId string) (*models.GetRegulationsOutput, error) {
 	return o.repo.GetPrivate(accountId)
+}
+
+func (o *RegulationService) GetSections(accountId string) (*models.GetSectionsOutput, error) {
+	return o.repo.GetSections(accountId)
 }
 
 func (o *RegulationService) GetByID(accountID, regulationID string) (*models.Regulation, error) {
