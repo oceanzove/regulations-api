@@ -15,6 +15,7 @@ type Auth interface {
 
 type Regulation interface {
 	GetPrivate(accountId string) (*models.GetRegulationsOutput, error)
+	GetByID(accountId string, regulationID string) (*models.Regulation, error)
 	UpdatePrivate(input models.UpdateRegulationInput, accountId string) error
 	Create(accountId string, input *models.CreateRegulationInput) error
 }

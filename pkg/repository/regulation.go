@@ -62,6 +62,15 @@ func (t *RegulationPostgres) Create(accountId string, input *models.CreateRegula
 	return nil
 }
 
+func (t *RegulationPostgres) GetByID(accountID, regulationID string) (*models.Regulation, error) {
+	var regulation models.Regulation
+	err := t.db.Get(&regulation, `SELECT * FROM "Regulation" WHERE id=$1 AND account_id=$2`, regulationID, accountID)
+	if err != nil {
+		return nil, err
+	}
+	return &regulation, nil
+}
+
 func (t *RegulationPostgres) GetPrivate(accountId string) (*models.GetRegulationsOutput, error) {
 	var output models.GetRegulationsOutput
 

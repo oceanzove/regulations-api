@@ -19,6 +19,7 @@ type Account interface {
 
 type Regulation interface {
 	GetPrivate(email string) (*models.GetRegulationsOutput, error)
+	GetByID(accountID string, regulationID string) (*models.Regulation, error)
 	UpdatePrivate(input models.UpdateRegulationInput, email string) error
 	Create(email string, input *models.CreateRegulationInput) error
 }

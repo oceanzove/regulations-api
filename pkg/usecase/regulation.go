@@ -25,6 +25,14 @@ func (u *Usecase) GetRegulation(accountId string) (*models.GetRegulationsOutput,
 	return output, Success
 }
 
+func (u *Usecase) GetRegulationByID(accountID, regulationID string) (*models.Regulation, ErrorCode) {
+	regulation, err := u.services.Regulation.GetByID(accountID, regulationID)
+	if err != nil {
+		return nil, InternalServerError
+	}
+	return regulation, Success
+}
+
 func (u *Usecase) UpdateRegulation(input models.UpdateRegulationInput, accountId string) ErrorCode {
 	err := u.services.Regulation.UpdatePrivate(input, accountId)
 	if err != nil {

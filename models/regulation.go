@@ -1,11 +1,13 @@
 package models
 
 type Regulation struct {
-	ID      string `json:"id"`
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	ID        string `json:"id" db:"id"`
+	Title     string `json:"title" db:"title"`
+	Content   string `json:"content" db:"content"`
+	AccountID string `json:"account_id" db:"account_id"`
+	CreatedAt string `json:"created_at" db:"created_at"`
+	UpdatedAt string `json:"updated_at" db:"updated_at"`
 }
-
 type GetRegulationsOutput struct {
 	Regulations []Regulation `json:"regulations"`
 }

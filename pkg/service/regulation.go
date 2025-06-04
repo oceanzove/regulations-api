@@ -29,6 +29,10 @@ func (o *RegulationService) GetPrivate(accountId string) (*models.GetRegulations
 	return o.repo.GetPrivate(accountId)
 }
 
+func (o *RegulationService) GetByID(accountID, regulationID string) (*models.Regulation, error) {
+	return o.repo.GetByID(accountID, regulationID)
+}
+
 func (o *RegulationService) UpdatePrivate(input models.UpdateRegulationInput, accountId string) error {
 	return o.repo.UpdatePrivate(input, accountId)
 }

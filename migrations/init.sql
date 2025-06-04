@@ -122,19 +122,6 @@ INSERT INTO "Process" ("id", "title", "description", "account_id")
 VALUES (gen_random_uuid(), 'Процесс 1', 'Описание процесса 1', '2497a896-7e45-4f53-b7c0-318df7569c75'),
        (gen_random_uuid(), 'Процесс 2', 'Описание процесса 2', '2497a896-7e45-4f53-b7c0-318df7569c75');
 
--- -- Привязываем процессы к регламентам (многие-ко-многим)
--- -- Предположим, что у процессов id = 'id1', 'id2' (замени на реальные uuid)
--- INSERT INTO "ProcessRegulation" ("process_id", "regulation_id")
--- VALUES ('id1', 1),
---        ('id1', 2), -- Процесс 1 относится к двум регламентам
---        ('id2', 1);
--- Процесс 2 к первому регламенту
-
--- Вставляем данные в таблицу Step
--- INSERT INTO "Step" ("id", "name", "description", "process_id", "order")
--- VALUES (gen_random_uuid(), 'Шаг 1', 'Описание шага 1', 'id1', 1),
---        (gen_random_uuid(), 'Шаг 2', 'Описание шага 2', 'id1', 2),
---        (gen_random_uuid(), 'Шаг 1', 'Описание шага 1 для процесса 2', 'id2', 1);
 
 -- Индексы для повышения производительности
 CREATE INDEX idx_account_id ON "Regulation" ("id");

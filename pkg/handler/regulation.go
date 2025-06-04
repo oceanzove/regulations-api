@@ -44,6 +44,23 @@ func (h *Handler) getRegulations(c *gin.Context) {
 	h.sendResponseSuccess(c, output, processStatus)
 }
 
+func (h *Handler) getRegulationByID(c *gin.Context) {
+	regulationID := c.Param("regulationID")
+
+	accountID := c.GetString(gin.AuthUserKey)
+	if accountID == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	regulation, regulationStatus := h.usecase.GetRegulationByID(accountID, regulationID)
+	if regulationStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+	h.sendResponseSuccess(c, regulation, usecase.Success)
+}
+
 func (h *Handler) updateRegulation(c *gin.Context) {
 	var input models.UpdateRegulationInput
 	if err := c.ShouldBindJSON(&input); err != nil {
