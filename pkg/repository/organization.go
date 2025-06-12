@@ -36,6 +36,21 @@ func (t *OrganizationPostgres) GetDepartments(accountId string) (*models.GetDepa
 	return &output, nil
 }
 
+func (t *OrganizationPostgres) GetDepartmentByID(accountId string, departmentId string) (*models.Department, error) {
+	var output models.Department
+
+	err := t.db.Get(&output, `
+	SELECT id, name
+	FROM "Department" WHERE id = $1
+`, departmentId)
+	if err != nil {
+		logrus.Error(err.Error())
+		return nil, err
+	}
+
+	return &output, nil
+}
+
 func (t *OrganizationPostgres) GetPositions(accountId string) (*models.GetPositionOutput, error) {
 	var output models.GetPositionOutput
 

@@ -29,9 +29,21 @@ func (t *RegulationPostgres) Create(accountId string, input *models.CreateRegula
 		return err
 	}
 
+	var departmentID string
+	err := t.db.Get(&departmentID, `
+		SELECT ed.department_id
+		FROM "EmployeeDepartment" ed
+		WHERE ed.employee_id = $1
+		LIMIT 1
+	`, accountId)
+	if err != nil {
+		logrus.Error("Failed to find department for employee/account: ", err)
+		return err
+	}
+
 	// 1. Получаем количество существующих регламентов для данного пользователя.
 	var count int
-	err := t.db.Get(&count, `SELECT COUNT(*) FROM "Regulation" WHERE account_id = $1`, accountId)
+	err = t.db.Get(&count, `SELECT COUNT(*) FROM "Regulation" WHERE department_id = $1`, departmentID)
 	if err != nil {
 		logrus.Error("Error while counting regulations: ", err.Error())
 		return err
@@ -50,10 +62,10 @@ func (t *RegulationPostgres) Create(accountId string, input *models.CreateRegula
 	// 4. Вставляем новый регламент в таблицу
 	var newRegulationID string
 	err = t.db.Get(&newRegulationID, `
-        INSERT INTO "Regulation" (id, title, content, account_id)
+        INSERT INTO "Regulation" (id, title, content, department_id)
         VALUES ($1, $2, $3, $4)
         RETURNING id
-    `, id, title, content, accountId)
+    `, id, title, content, departmentID)
 	if err != nil {
 		logrus.Error("Error while inserting new regulation: ", err.Error())
 		return err
@@ -65,52 +77,70 @@ func (t *RegulationPostgres) Create(accountId string, input *models.CreateRegula
 func (t *RegulationPostgres) CreateSection(accountId string, input *models.CreateSectionInput) error {
 	if input == nil {
 		err := errors.New("input is nil")
-		logrus.Error(err, err.Error())
+		logrus.Error(err)
 		return err
 	}
-
 	if input.ID == "" {
 		err := errors.New("input ID is required")
-		logrus.Error(err, err.Error())
+		logrus.Error(err)
 		return err
 	}
 
-	// 1. Получаем количество существующих регламентов для данного пользователя.
+	// Получить количество секций (можно убрать, если не нужен автотайтл)
 	var count int
 	err := t.db.Get(&count, `SELECT COUNT(*) FROM "Section"`)
 	if err != nil {
-		logrus.Error("Error while counting regulations: ", err.Error())
+		logrus.Error("Error while counting sections: ", err)
 		return err
 	}
 
-	// 2. Генерируем название, если не задано
+	// Заголовок по умолчанию
 	title := input.Title
 	if title == "" {
 		title = fmt.Sprintf("Секция %d", count+1)
 	}
 
-	// 3. Используем ID и content из input
-	id := input.ID
-	content := input.Content
+	// Получить department_id сотрудника
+	var departmentID string
+	err = t.db.Get(&departmentID, `
+		SELECT ed.department_id
+		FROM "EmployeeDepartment" ed
+		WHERE ed.employee_id = $1
+		LIMIT 1
+	`, accountId)
+	if err != nil {
+		logrus.Error("Failed to find department for employee/account: ", err)
+		return err
+	}
 
-	// 4. Вставляем новый регламент в таблицу
+	// Вставка новой секции
 	var newSectionID string
 	err = t.db.Get(&newSectionID, `
-        INSERT INTO "Section" (id, title, content, account_id)
+        INSERT INTO "Section" (id, title, content, department_id)
         VALUES ($1, $2, $3, $4)
         RETURNING id
-    `, id, title, content, accountId)
+    `, input.ID, title, input.Content, departmentID)
 	if err != nil {
-		logrus.Error("Error while inserting new section: ", err.Error())
+		logrus.Error("Error while inserting new section: ", err)
 		return err
 	}
 
 	return nil
 }
 
-func (t *RegulationPostgres) GetByID(accountID, regulationID string) (*models.Regulation, error) {
+func (t *RegulationPostgres) GetByID(accountID string, regulationID string) (*models.Regulation, error) {
+
+	var departmentID string
+	err := t.db.Get(&departmentID, `
+	SELECT ed.department_id
+	FROM "EmployeeDepartment" ed
+	WHERE ed.employee_id = $1
+	LIMIT 1
+	`, accountID)
+
 	var regulation models.Regulation
-	err := t.db.Get(&regulation, `SELECT * FROM "Regulation" WHERE id=$1 AND account_id=$2`, regulationID, accountID)
+
+	err = t.db.Get(&regulation, `SELECT * FROM "Regulation" WHERE id=$1 AND department_id=$2`, regulationID, departmentID)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +150,15 @@ func (t *RegulationPostgres) GetByID(accountID, regulationID string) (*models.Re
 func (t *RegulationPostgres) GetPrivate(accountId string) (*models.GetRegulationsOutput, error) {
 	var output models.GetRegulationsOutput
 
-	err := t.db.Select(&output.Regulations, `SELECT id, title, content FROM "Regulation" WHERE  account_id = $1`, accountId)
+	var departmentID string
+	err := t.db.Get(&departmentID, `
+	SELECT ed.department_id
+	FROM "EmployeeDepartment" ed
+	WHERE ed.employee_id = $1
+	LIMIT 1
+	`, accountId)
+
+	err = t.db.Select(&output.Regulations, `SELECT id, title, content FROM "Regulation" WHERE  department_id = $1`, departmentID)
 	if err != nil {
 		logrus.Error(err.Error())
 		return nil, err

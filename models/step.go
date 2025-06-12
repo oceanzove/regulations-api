@@ -6,7 +6,7 @@ type Step struct {
 	Order       int    `json:"order" db:"order"`
 	ProcessID   string `json:"processId" db:"process_id"`
 	Description string `json:"description" db:"description"`
-	Responsible string `json:"responsible" db:"responsible"`
+	Responsible string `json:"responsible" db:"responsible_id"`
 }
 type CreateStepsInput struct {
 	Steps []Step `json:"steps"`

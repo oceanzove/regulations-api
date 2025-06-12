@@ -37,6 +37,23 @@ func (h *Handler) getDepartments(c *gin.Context) {
 
 	h.sendResponseSuccess(c, output, processStatus)
 }
+func (h *Handler) getDepartmentById(c *gin.Context) {
+	departmentId := c.Param("departmentID")
+
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	output, processStatus := h.usecase.GetDepartmentById(accountId, departmentId)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, output, processStatus)
+}
 
 func (h *Handler) getPositions(c *gin.Context) {
 	accountId := c.GetString(gin.AuthUserKey)

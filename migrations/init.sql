@@ -119,7 +119,7 @@ CREATE TABLE "Step"
     "id"             uuid PRIMARY KEY,
     "name"           VARCHAR NOT NULL,
     "description"    TEXT,
-    "responsible_id" uuid    NOT NULL REFERENCES "Employee" ("id"),
+    "responsible_id" uuid    NOT NULL REFERENCES "Position" ("id"),
     "process_id"     uuid REFERENCES "Process" ("id") ON DELETE CASCADE,
     "order"          INT     NOT NULL
 );

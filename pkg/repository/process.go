@@ -31,7 +31,7 @@ func (t *ProcessPostgres) Create(accountId string, input *models.CreateProcessIn
 
 	// 1. Получаем количество существующих регламентов для данного пользователя.
 	var count int
-	err := t.db.Get(&count, `SELECT COUNT(*) FROM "Process" WHERE responsible = $1`, accountId)
+	err := t.db.Get(&count, `SELECT COUNT(*) FROM "Process" WHERE responsible = $1`, input.Responsible)
 	if err != nil {
 		logrus.Error("Error while counting input: ", err.Error())
 		return err
@@ -51,10 +51,10 @@ func (t *ProcessPostgres) Create(accountId string, input *models.CreateProcessIn
 	// 4. Вставляем новый процесс в таблицу
 	var newProcessID string
 	err = t.db.Get(&newProcessID, `
-		INSERT INTO "Process" (id, title, description, account_id, responsible)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO "Process" (id, title, description, responsible)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id
-	`, id, title, description, accountId, responsible)
+	`, id, title, description, responsible)
 	if err != nil {
 		logrus.Error("Error while inserting new input: ", err.Error())
 		return err
@@ -66,7 +66,15 @@ func (t *ProcessPostgres) Create(accountId string, input *models.CreateProcessIn
 func (t *ProcessPostgres) GetPrivate(accountId string) (*models.GetProcessesOutput, error) {
 	var output models.GetProcessesOutput
 
-	err := t.db.Select(&output.Processes, `SELECT id, title, description FROM "Process" WHERE  account_id = $1`, accountId)
+	var departmentID string
+	err := t.db.Get(&departmentID, `
+	SELECT ed.department_id
+	FROM "EmployeeDepartment" ed
+	WHERE ed.employee_id = $1
+	LIMIT 1
+	`, accountId)
+
+	err = t.db.Select(&output.Processes, `SELECT id, title, description FROM "Process" WHERE  responsible = $1`, departmentID)
 	if err != nil {
 		logrus.Error(err.Error())
 		return nil, err
@@ -77,7 +85,16 @@ func (t *ProcessPostgres) GetPrivate(accountId string) (*models.GetProcessesOutp
 
 func (t *ProcessPostgres) GetByID(accountID, processID string) (*models.Process, error) {
 	var process models.Process
-	err := t.db.Get(&process, `SELECT * FROM "Process" WHERE id=$1 AND account_id=$2`, processID, accountID)
+
+	var departmentID string
+	err := t.db.Get(&departmentID, `
+	SELECT ed.department_id
+	FROM "EmployeeDepartment" ed
+	WHERE ed.employee_id = $1
+	LIMIT 1
+	`, accountID)
+
+	err = t.db.Get(&process, `SELECT * FROM "Process" WHERE id=$1 AND responsible=$2`, processID, departmentID)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +125,7 @@ func (t *ProcessPostgres) CreateStep(input *models.Step) error {
 		return errors.New("input is nil")
 	}
 	_, err := t.db.Exec(`
-		INSERT INTO "Step" (id, name, description, process_id, responsible, "order")
+		INSERT INTO "Step" (id, name, description, process_id, responsible_id, "order")
 		VALUES ($1, $2, $3, $4, $5, $6)
 	`, input.ID, input.Name, input.Description, input.ProcessID, input.Responsible, input.Order)
 	return err
@@ -119,7 +136,7 @@ func (t *ProcessPostgres) GetStepsByProcess(processID string) ([]*models.Step, e
 
 	err := t.db.Select(
 		&steps,
-		`SELECT id, name, description, "order", process_id, responsible
+		`SELECT id, name, description, "order", process_id, responsible_id
 		 FROM "Step"
 		 WHERE process_id = $1`,
 		processID,

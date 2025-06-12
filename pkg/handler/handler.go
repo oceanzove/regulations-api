@@ -56,6 +56,7 @@ func (h *Handler) InitHTTPRoutes(config *models.ServerConfig) *gin.Engine {
 			}
 			department := organization.Group("/department")
 			{
+				department.GET("/:departmentID", h.getDepartmentById)
 				department.GET("", h.getDepartments)
 			}
 			position := organization.Group("/position")

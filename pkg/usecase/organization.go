@@ -21,6 +21,14 @@ func (u *Usecase) GetDepartments(accountID string) (*models.GetDepartmentOutput,
 	return departments, Success
 }
 
+func (u *Usecase) GetDepartmentById(accountID string, departmentId string) (*models.Department, ErrorCode) {
+	department, err := u.services.Organization.GetDepartmentByID(accountID, departmentId)
+	if err != nil {
+		return nil, InternalServerError
+	}
+	return department, Success
+}
+
 func (u *Usecase) GetPositions(accountID string) (*models.GetPositionOutput, ErrorCode) {
 	positions, err := u.services.Organization.GetPositions(accountID)
 	if err != nil {

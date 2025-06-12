@@ -17,6 +17,10 @@ func (o *OrganizationService) GetDepartments(accountId string) (*models.GetDepar
 	return o.repo.GetDepartments(accountId)
 }
 
+func (o *OrganizationService) GetDepartmentByID(accountId string, departmentId string) (*models.Department, error) {
+	return o.repo.GetDepartmentByID(accountId, departmentId)
+}
+
 func (o *OrganizationService) GetPositions(accountId string) (*models.GetPositionOutput, error) {
 	return o.repo.GetPositions(accountId)
 }

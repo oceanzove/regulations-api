@@ -43,6 +43,7 @@ type Step interface {
 
 type Organization interface {
 	GetDepartments(accountId string) (*models.GetDepartmentOutput, error)
+	GetDepartmentByID(accountId string, departmentId string) (*models.Department, error)
 	GetPositions(accountId string) (*models.GetPositionOutput, error)
 	GetPositionsByDepartment(accountId string, departmentId string) (*models.GetPositionOutput, error)
 	GetEmployees(accountId string) (*models.GetEmployeesOutput, error)
