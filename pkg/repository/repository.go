@@ -13,7 +13,7 @@ type Auth interface {
 }
 
 type Account interface {
-	Get(email string) (*models.Account, error)
+	Get(login string) (*models.Account, error)
 	GetByID(id string) (*models.Account, error)
 }
 
@@ -41,19 +41,29 @@ type Step interface {
 	CreateSteps(input *models.CreateStepsInput) error
 }
 
+type Organization interface {
+	GetDepartments(accountId string) (*models.GetDepartmentOutput, error)
+	GetPositions(accountId string) (*models.GetPositionOutput, error)
+	GetPositionsByDepartment(accountId string, departmentId string) (*models.GetPositionOutput, error)
+	GetEmployees(accountId string) (*models.GetEmployeesOutput, error)
+	CreateEmployee(input *models.CreateEmployeeInput) error
+}
+
 type Repository struct {
 	Account
 	Auth
 	Regulation
 	Process
 	Step
+	Organization
 }
 
 func NewRepository(sources *Sources) *Repository {
 	return &Repository{
-		Account:    NewAccountPostgres(sources.BusinessDB),
-		Auth:       NewAuthPostgres(sources.BusinessDB),
-		Regulation: NewRegulationPostgres(sources.BusinessDB),
-		Process:    NewProcessPostgres(sources.BusinessDB),
+		Account:      NewAccountPostgres(sources.BusinessDB),
+		Auth:         NewAuthPostgres(sources.BusinessDB),
+		Regulation:   NewRegulationPostgres(sources.BusinessDB),
+		Process:      NewProcessPostgres(sources.BusinessDB),
+		Organization: NewOrganizationPostgres(sources.BusinessDB),
 	}
 }

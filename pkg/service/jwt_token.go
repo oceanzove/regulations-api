@@ -44,7 +44,7 @@ func getSecretKey(config models.ServerConfig) []byte {
 func (s *JWTTokenService) GenerateAccessToken(account *models.Account) (string, error) {
 	claims := models.JWTClaims{
 		ID:        account.ID,
-		Email:     account.Email,
+		Login:     account.Login,
 		TokenType: "access",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(AccessTokenTTL).UTC()),
@@ -59,7 +59,7 @@ func (s *JWTTokenService) GenerateAccessToken(account *models.Account) (string, 
 func (s *JWTTokenService) GenerateRefreshToken(account *models.Account) (string, error) {
 	claims := models.JWTClaims{
 		ID:        account.ID,
-		Email:     account.Email,
+		Login:     account.Login,
 		TokenType: "refresh",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(RefreshTokenTTL).UTC()),

@@ -196,10 +196,12 @@ VALUES ('e1111111-1111-1111-1111-111111111111', 'd1111111-1111-1111-1111-1111111
 
 -- Пользовательские аккаунты (id = id сотрудника!)
 INSERT INTO "Account" ("id", "login", "password", "role")
-VALUES ('e1111111-1111-1111-1111-111111111111', 'ivanov', 'password1', 'employee'),
+VALUES ('e1111111-1111-1111-1111-111111111111', 'ivanov',
+        '$2a$10$A6lwFl3TlDyZA3UkbobGFOFe.PyI0iQsEUlm1rILs7HWGAaV3AKcC', 'employee'),
        ('e2222222-2222-2222-2222-222222222222', 'petrov',
         '$2a$10$A6lwFl3TlDyZA3UkbobGFOFe.PyI0iQsEUlm1rILs7HWGAaV3AKcC', 'administrator'),
-       ('e3333333-3333-3333-3333-333333333333', 'sidorova', 'password3', 'employee');
+       ('e3333333-3333-3333-3333-333333333333', 'sidorova',
+        '$2a$10$A6lwFl3TlDyZA3UkbobGFOFe.PyI0iQsEUlm1rILs7HWGAaV3AKcC', 'employee');
 
 
 --- Каталог секций

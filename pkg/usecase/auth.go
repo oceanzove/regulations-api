@@ -6,7 +6,7 @@ import (
 )
 
 func (u *Usecase) SignIn(input *models.SignInInput) (*models.SignInOutput, ErrorCode) {
-	account, err := u.services.Account.Get(input.Email)
+	account, err := u.services.Account.Get(input.Login)
 	if err != nil {
 		logrus.Error(err)
 		return nil, InternalServerError

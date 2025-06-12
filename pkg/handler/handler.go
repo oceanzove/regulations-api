@@ -46,6 +46,24 @@ func (h *Handler) InitHTTPRoutes(config *models.ServerConfig) *gin.Engine {
 			auth.POST("/sign-in", h.signIn)
 			auth.POST("/refresh", h.refresh)
 		}
+		organization := api.Group("/organization", h.UserIdentityMiddleware)
+		{
+			employee := organization.Group("/employee")
+			{
+				employee.POST("", h.createEmployee)
+				employee.GET("/account", h.getAccount)
+				employee.GET("", h.getEmployees)
+			}
+			department := organization.Group("/department")
+			{
+				department.GET("", h.getDepartments)
+			}
+			position := organization.Group("/position")
+			{
+				position.GET("", h.getPositions)
+				position.GET("/:departmentID", h.getPositionsByDepartment)
+			}
+		}
 		regulation := api.Group("/regulation", h.UserIdentityMiddleware)
 		{
 			regulation.GET("", h.getRegulations)

@@ -24,10 +24,10 @@ func NewAccountPostgres(db *sqlx.DB) *AccountPostgres {
 	return &AccountPostgres{db: db}
 }
 
-func (r *AccountPostgres) Get(email string) (*models.Account, error) {
+func (r *AccountPostgres) Get(login string) (*models.Account, error) {
 	var account models.Account
 
-	if err := r.db.Get(&account, `SELECT * FROM "Account" WHERE email=$1`, email); err != nil {
+	if err := r.db.Get(&account, `SELECT * FROM "Account" WHERE login=$1`, login); err != nil {
 		logrus.Error(err.Error())
 		return nil, clerr.ErrorServer
 	}

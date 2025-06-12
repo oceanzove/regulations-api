@@ -6,7 +6,8 @@ import (
 )
 
 type Account interface {
-	Get(email string) (*models.Account, error)
+	Get(login string) (*models.Account, error)
+	GetByID(id string) (*models.Account, error)
 }
 
 type Auth interface {
@@ -37,6 +38,14 @@ type Step interface {
 	Create(input *models.CreateStepsInput) error
 }
 
+type Organization interface {
+	GetDepartments(accountId string) (*models.GetDepartmentOutput, error)
+	GetPositions(accountId string) (*models.GetPositionOutput, error)
+	GetPositionsByDepartment(accountId string, departmentId string) (*models.GetPositionOutput, error)
+	GetEmployees(accountId string) (*models.GetEmployeesOutput, error)
+	CreateEmployee(accountId string, input *models.CreateEmployeeInput) error
+}
+
 type JWTToken interface {
 	GenerateAccessToken(account *models.Account) (string, error)
 	GenerateRefreshToken(account *models.Account) (string, error)
@@ -51,14 +60,16 @@ type Service struct {
 	Process
 	JWTToken
 	Step
+	Organization
 }
 
 func NewService(repos *repository.Repository, config *models.ConfigService) *Service {
 	return &Service{
-		Account:    NewAccountService(repos.Account),
-		Auth:       NewAuthService(repos.Auth),
-		JWTToken:   NewJWTTokenService(config.Server, repos.Account),
-		Regulation: NewRegulationService(repos.Regulation),
-		Process:    NewProcessService(repos.Process),
+		Account:      NewAccountService(repos.Account),
+		Auth:         NewAuthService(repos.Auth),
+		JWTToken:     NewJWTTokenService(config.Server, repos.Account),
+		Regulation:   NewRegulationService(repos.Regulation),
+		Process:      NewProcessService(repos.Process),
+		Organization: NewOrganizationService(repos.Organization),
 	}
 }

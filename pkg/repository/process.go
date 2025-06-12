@@ -31,7 +31,7 @@ func (t *ProcessPostgres) Create(accountId string, input *models.CreateProcessIn
 
 	// 1. Получаем количество существующих регламентов для данного пользователя.
 	var count int
-	err := t.db.Get(&count, `SELECT COUNT(*) FROM "Process" WHERE account_id = $1`, accountId)
+	err := t.db.Get(&count, `SELECT COUNT(*) FROM "Process" WHERE responsible = $1`, accountId)
 	if err != nil {
 		logrus.Error("Error while counting input: ", err.Error())
 		return err
