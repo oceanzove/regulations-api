@@ -51,8 +51,16 @@ func (h *Handler) InitHTTPRoutes(config *models.ServerConfig) *gin.Engine {
 			employee := organization.Group("/employee")
 			{
 				employee.POST("", h.createEmployee)
-				employee.GET("/account", h.getAccount)
 				employee.GET("", h.getEmployees)
+				employee.GET("/:employeeID", h.getEmployeeById)
+				employee.GET("/department/:employeeID", h.getDepartmentByEmployeeId)
+				employee.GET("/position/:employeeID", h.getPositionByEmployeeId)
+
+				account := employee.Group("/account")
+				{
+					account.GET("", h.getAccount)
+					account.GET("/:accountID", h.getAccountById)
+				}
 			}
 			department := organization.Group("/department")
 			{

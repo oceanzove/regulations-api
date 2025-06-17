@@ -190,6 +190,57 @@ func (t *OrganizationPostgres) CreateEmployee(input *models.CreateEmployeeInput)
 	return nil
 }
 
+func (t *OrganizationPostgres) GetEmployeeById(employeeId string) (*models.Employee, error) {
+	var output models.Employee
+
+	err := t.db.Get(&output, `
+	SELECT *
+	FROM "Employee" WHERE id = $1
+`, employeeId)
+	if err != nil {
+		logrus.Error(err.Error())
+		return nil, err
+	}
+
+	return &output, nil
+}
+
+func (t *OrganizationPostgres) GetDepartmentByEmployeeId(employeeId string) (*models.Department, error) {
+	var output models.Department
+
+	err := t.db.Get(&output, `
+		SELECT d.id, d.name
+		FROM "EmployeeDepartment" ed
+		JOIN "Department" d ON ed.department_id = d.id
+		WHERE ed.employee_id = $1
+		LIMIT 1
+	`, employeeId)
+	if err != nil {
+		logrus.Error(err.Error())
+		return nil, err
+	}
+
+	return &output, nil
+}
+
+func (t *OrganizationPostgres) GetPositionByEmployeeId(employeeId string) (*models.Position, error) {
+	var output models.Position
+
+	err := t.db.Get(&output, `
+		SELECT p.*
+		FROM "EmployeePosition" ep
+		JOIN "Position" p ON ep.position_id = p.id
+		WHERE ep.employee_id = $1
+		LIMIT 1
+	`, employeeId)
+	if err != nil {
+		logrus.Error(err.Error())
+		return nil, err
+	}
+
+	return &output, nil
+}
+
 func (t *OrganizationPostgres) GetEmployees(accountId string) (*models.GetEmployeesOutput, error) {
 	var output models.GetEmployeesOutput
 

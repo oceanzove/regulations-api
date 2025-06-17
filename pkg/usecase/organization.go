@@ -52,6 +52,29 @@ func (u *Usecase) GetEmployees(accountID string) (*models.GetEmployeesOutput, Er
 	}
 	return employees, Success
 }
+func (u *Usecase) GetEmployeeById(employeeId string) (*models.Employee, ErrorCode) {
+	employee, err := u.services.Organization.GetEmployeeById(employeeId)
+	if err != nil {
+		return nil, InternalServerError
+	}
+	return employee, Success
+}
+
+func (u *Usecase) GetDepartmentByEmployeeId(employeeId string) (*models.Department, ErrorCode) {
+	employee, err := u.services.Organization.GetDepartmentByEmployeeId(employeeId)
+	if err != nil {
+		return nil, InternalServerError
+	}
+	return employee, Success
+}
+
+func (u *Usecase) GetPositionByEmployeeId(employeeId string) (*models.Position, ErrorCode) {
+	employee, err := u.services.Organization.GetPositionByEmployeeId(employeeId)
+	if err != nil {
+		return nil, InternalServerError
+	}
+	return employee, Success
+}
 
 func (u *Usecase) CreateEmployee(accountId string, input *models.CreateEmployeeInput) ErrorCode {
 	err := u.services.Organization.CreateEmployee(accountId, input)

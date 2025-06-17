@@ -33,6 +33,18 @@ func (o *OrganizationService) GetEmployees(accountId string) (*models.GetEmploye
 	return o.repo.GetEmployees(accountId)
 }
 
+func (o *OrganizationService) GetEmployeeById(employeeId string) (*models.Employee, error) {
+	return o.repo.GetEmployeeById(employeeId)
+}
+
+func (o *OrganizationService) GetDepartmentByEmployeeId(employeeId string) (*models.Department, error) {
+	return o.repo.GetDepartmentByEmployeeId(employeeId)
+}
+
+func (o *OrganizationService) GetPositionByEmployeeId(employeeId string) (*models.Position, error) {
+	return o.repo.GetPositionByEmployeeId(employeeId)
+}
+
 func (o *OrganizationService) CreateEmployee(accountId string, input *models.CreateEmployeeInput) error {
 	return o.repo.CreateEmployee(input)
 }

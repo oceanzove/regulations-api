@@ -47,6 +47,9 @@ type Organization interface {
 	GetPositions(accountId string) (*models.GetPositionOutput, error)
 	GetPositionsByDepartment(accountId string, departmentId string) (*models.GetPositionOutput, error)
 	GetEmployees(accountId string) (*models.GetEmployeesOutput, error)
+	GetEmployeeById(employeeId string) (*models.Employee, error)
+	GetDepartmentByEmployeeId(employeeId string) (*models.Department, error)
+	GetPositionByEmployeeId(employeeId string) (*models.Position, error)
 	CreateEmployee(input *models.CreateEmployeeInput) error
 }
 

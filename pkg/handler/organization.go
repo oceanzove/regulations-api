@@ -22,6 +22,18 @@ func (h *Handler) getAccount(c *gin.Context) {
 	h.sendResponseSuccess(c, output, processStatus)
 }
 
+func (h *Handler) getAccountById(c *gin.Context) {
+	accountId := c.Param("accountID")
+
+	output, processStatus := h.usecase.GetAccount(accountId)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, output, processStatus)
+}
+
 func (h *Handler) getDepartments(c *gin.Context) {
 	accountId := c.GetString(gin.AuthUserKey)
 	if accountId == "" {
@@ -118,6 +130,42 @@ func (h *Handler) getEmployees(c *gin.Context) {
 	}
 
 	output, processStatus := h.usecase.GetEmployees(accountId)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, output, processStatus)
+}
+
+func (h *Handler) getEmployeeById(c *gin.Context) {
+	employeeId := c.Param("employeeID")
+
+	output, processStatus := h.usecase.GetEmployeeById(employeeId)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, output, processStatus)
+}
+
+func (h *Handler) getDepartmentByEmployeeId(c *gin.Context) {
+	employeeId := c.Param("employeeID")
+
+	output, processStatus := h.usecase.GetDepartmentByEmployeeId(employeeId)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, output, processStatus)
+}
+
+func (h *Handler) getPositionByEmployeeId(c *gin.Context) {
+	employeeId := c.Param("employeeID")
+
+	output, processStatus := h.usecase.GetPositionByEmployeeId(employeeId)
 	if processStatus != usecase.Success {
 		h.sendResponseSuccess(c, nil, processStatus)
 		return
