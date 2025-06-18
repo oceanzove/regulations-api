@@ -85,3 +85,43 @@ func (u *Usecase) CreateEmployee(accountId string, input *models.CreateEmployeeI
 
 	return Success
 }
+
+func (u *Usecase) UpdateEmployee(input *models.Employee) ErrorCode {
+	err := u.services.Organization.UpdateEmployee(input)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}
+
+func (u *Usecase) UpdateAccount(input *models.Account) ErrorCode {
+	err := u.services.Organization.UpdateAccount(input)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}
+
+func (u *Usecase) UpdateEmployeeDepartment(input *models.UpdateEmployeeDepartment) ErrorCode {
+	err := u.services.Organization.UpdateEmployeeDepartment(input)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}
+
+func (u *Usecase) UpdateEmployeePosition(input *models.UpdateEmployeePosition) ErrorCode {
+	err := u.services.Organization.UpdateEmployeePosition(input)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}

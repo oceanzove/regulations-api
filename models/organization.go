@@ -9,11 +9,20 @@ type GetDepartmentOutput struct {
 	Departments []Department `json:"departments"`
 }
 
+type UpdateEmployeeDepartment struct {
+	EmployeeID   string `json:"employeeId"`
+	DepartmentID string `json:"departmentId"`
+}
+
 type Position struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
+type UpdateEmployeePosition struct {
+	EmployeeID string `json:"employeeId"`
+	PositionID string `json:"positionId"`
+}
 type GetPositionOutput struct {
 	Positions []Position `json:"positions"`
 }

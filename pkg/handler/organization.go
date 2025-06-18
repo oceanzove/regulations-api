@@ -122,6 +122,98 @@ func (h *Handler) createEmployee(c *gin.Context) {
 	h.sendResponseSuccess(c, nil, employeeStatus)
 }
 
+func (h *Handler) updateEmployee(c *gin.Context) {
+	var input *models.Employee
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+
+	employeeID := c.Param("processID")
+	input.ID = employeeID
+
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	processStatus := h.usecase.UpdateEmployee(input)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+}
+
+func (h *Handler) updateAccount(c *gin.Context) {
+	var input *models.Account
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+
+	accountID := c.Param("accountID")
+	input.ID = accountID
+
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	processStatus := h.usecase.UpdateAccount(input)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+}
+
+func (h *Handler) updateEmployeePosition(c *gin.Context) {
+	var input *models.UpdateEmployeePosition
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+
+	EmployeeID := c.Param("EmployeeID")
+	input.EmployeeID = EmployeeID
+
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	processStatus := h.usecase.UpdateEmployeePosition(input)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+}
+
+func (h *Handler) updateEmployeeDepartment(c *gin.Context) {
+	var input *models.UpdateEmployeeDepartment
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+
+	EmployeeID := c.Param("EmployeeID")
+	input.EmployeeID = EmployeeID
+
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	processStatus := h.usecase.UpdateEmployeeDepartment(input)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+}
+
 func (h *Handler) getEmployees(c *gin.Context) {
 	accountId := c.GetString(gin.AuthUserKey)
 	if accountId == "" {

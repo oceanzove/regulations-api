@@ -48,6 +48,10 @@ type Organization interface {
 	GetDepartmentByEmployeeId(employeeId string) (*models.Department, error)
 	GetPositionByEmployeeId(employeeId string) (*models.Position, error)
 	CreateEmployee(accountId string, input *models.CreateEmployeeInput) error
+	UpdateEmployee(input *models.Employee) error
+	UpdateAccount(input *models.Account) error
+	UpdateEmployeeDepartment(input *models.UpdateEmployeeDepartment) error
+	UpdateEmployeePosition(input *models.UpdateEmployeePosition) error
 }
 
 type JWTToken interface {

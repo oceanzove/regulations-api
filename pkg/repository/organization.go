@@ -264,3 +264,79 @@ func (t *OrganizationPostgres) GetEmployees(accountId string) (*models.GetEmploy
 
 	return &output, nil
 }
+
+func (t *OrganizationPostgres) UpdateEmployee(input *models.Employee) error {
+	_, err := t.db.Exec(`UPDATE "Employee" SET
+                      full_name = $1,
+                      phone_number = $2,
+                      birth_date = $3,
+                      employment_date = $4,
+                      residential_address = $5,
+                      marital_status = $6,
+                      email = $7
+                      WHERE Id = $8`,
+		input.FullName,
+		input.PhoneNumber,
+		input.BirthDate,
+		input.EmploymentDate,
+		input.ResidentialAddress,
+		input.MaritalStatus,
+		input.Email,
+		input.ID,
+	)
+	if err != nil {
+		logrus.Error(err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (t *OrganizationPostgres) UpdateAccount(input *models.Account) error {
+	_, err := t.db.Exec(`UPDATE "Account" SET
+                      login = $1,
+                      password = $2,
+                      role = $3
+                      WHERE Id = $4`,
+		input.Login,
+		input.Password,
+		input.Role,
+		input.ID,
+	)
+	if err != nil {
+		logrus.Error(err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (t *OrganizationPostgres) UpdateEmployeeDepartment(input *models.UpdateEmployeeDepartment) error {
+	_, err := t.db.Exec(`UPDATE "EmployeeDepartment" SET
+                      department_id = $1
+                      WHERE employee_id = $2`,
+		input.DepartmentID,
+		input.EmployeeID,
+	)
+	if err != nil {
+		logrus.Error(err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (t *OrganizationPostgres) UpdateEmployeePosition(input *models.UpdateEmployeePosition) error {
+	_, err := t.db.Exec(`UPDATE "EmployeePosition" SET
+                      position_id = $1
+                      WHERE employee_id = $2`,
+		input.PositionID,
+		input.EmployeeID,
+	)
+	if err != nil {
+		logrus.Error(err.Error())
+		return err
+	}
+
+	return nil
+}

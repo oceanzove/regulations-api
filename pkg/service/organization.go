@@ -48,3 +48,19 @@ func (o *OrganizationService) GetPositionByEmployeeId(employeeId string) (*model
 func (o *OrganizationService) CreateEmployee(accountId string, input *models.CreateEmployeeInput) error {
 	return o.repo.CreateEmployee(input)
 }
+
+func (o *OrganizationService) UpdateEmployee(input *models.Employee) error {
+	return o.repo.UpdateEmployee(input)
+}
+
+func (o *OrganizationService) UpdateAccount(input *models.Account) error {
+	return o.repo.UpdateAccount(input)
+}
+
+func (o *OrganizationService) UpdateEmployeeDepartment(input *models.UpdateEmployeeDepartment) error {
+	return o.repo.UpdateEmployeeDepartment(input)
+}
+
+func (o *OrganizationService) UpdateEmployeePosition(input *models.UpdateEmployeePosition) error {
+	return o.repo.UpdateEmployeePosition(input)
+}
