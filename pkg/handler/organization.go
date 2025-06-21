@@ -49,6 +49,7 @@ func (h *Handler) getDepartments(c *gin.Context) {
 
 	h.sendResponseSuccess(c, output, processStatus)
 }
+
 func (h *Handler) getDepartmentById(c *gin.Context) {
 	departmentId := c.Param("departmentID")
 
@@ -122,6 +123,84 @@ func (h *Handler) createEmployee(c *gin.Context) {
 	h.sendResponseSuccess(c, nil, employeeStatus)
 }
 
+func (h *Handler) createPosition(c *gin.Context) {
+	var input *models.CreatePositionInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+
+	employeeStatus := h.usecase.CreatePosition(input)
+	if employeeStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, employeeStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, nil, employeeStatus)
+}
+
+func (h *Handler) createDepartment(c *gin.Context) {
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	var input *models.CreateDepartmentInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+
+	employeeStatus := h.usecase.CreateDepartment(accountId, input)
+	if employeeStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, employeeStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, nil, employeeStatus)
+}
+
+func (h *Handler) updatePositionById(c *gin.Context) {
+	var input *models.UpdatePositionInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+
+	positionID := c.Param("positionID")
+	input.ID = positionID
+
+	processStatus := h.usecase.UpdatePositionById(input)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+}
+
+func (h *Handler) updateDepartmentById(c *gin.Context) {
+	var input *models.UpdateDepartmentInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	departmentID := c.Param("departmentID")
+	input.ID = departmentID
+
+	processStatus := h.usecase.UpdateDepartmentById(accountId, input)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+}
+
 func (h *Handler) updateEmployee(c *gin.Context) {
 	var input *models.Employee
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -129,7 +208,7 @@ func (h *Handler) updateEmployee(c *gin.Context) {
 		return
 	}
 
-	employeeID := c.Param("processID")
+	employeeID := c.Param("employeeID")
 	input.ID = employeeID
 
 	accountId := c.GetString(gin.AuthUserKey)
@@ -175,7 +254,7 @@ func (h *Handler) updateEmployeePosition(c *gin.Context) {
 		return
 	}
 
-	EmployeeID := c.Param("EmployeeID")
+	EmployeeID := c.Param("employeeID")
 	input.EmployeeID = EmployeeID
 
 	accountId := c.GetString(gin.AuthUserKey)
@@ -198,7 +277,7 @@ func (h *Handler) updateEmployeeDepartment(c *gin.Context) {
 		return
 	}
 
-	EmployeeID := c.Param("EmployeeID")
+	EmployeeID := c.Param("employeeID")
 	input.EmployeeID = EmployeeID
 
 	accountId := c.GetString(gin.AuthUserKey)
@@ -254,6 +333,54 @@ func (h *Handler) getDepartmentByEmployeeId(c *gin.Context) {
 	h.sendResponseSuccess(c, output, processStatus)
 }
 
+func (h *Handler) getDepartmentPosition(c *gin.Context) {
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	output, processStatus := h.usecase.GetDepartmentPosition(accountId)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, output, processStatus)
+}
+
+func (h *Handler) getEmployeeDepartment(c *gin.Context) {
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	output, processStatus := h.usecase.GetEmployeeDepartment(accountId)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, output, processStatus)
+}
+
+func (h *Handler) getEmployeePosition(c *gin.Context) {
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	output, processStatus := h.usecase.GetEmployeePosition(accountId)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, output, processStatus)
+}
+
 func (h *Handler) getPositionByEmployeeId(c *gin.Context) {
 	employeeId := c.Param("employeeID")
 
@@ -264,4 +391,20 @@ func (h *Handler) getPositionByEmployeeId(c *gin.Context) {
 	}
 
 	h.sendResponseSuccess(c, output, processStatus)
+}
+
+func (h *Handler) deleteEmployeeById(c *gin.Context) {
+	employeeId := c.Param("employeeID")
+
+	accountId := c.GetString(gin.AuthUserKey)
+	if accountId == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	processStatus := h.usecase.DeleteEmployeeById(employeeId)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
 }

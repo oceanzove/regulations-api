@@ -52,6 +52,23 @@ func (u *Usecase) GetEmployees(accountID string) (*models.GetEmployeesOutput, Er
 	}
 	return employees, Success
 }
+
+func (u *Usecase) GetEmployeeDepartment(accountId string) (*models.GetEmployeeDepartmentOutput, ErrorCode) {
+	employees, err := u.services.Organization.GetEmployeeDepartment(accountId)
+	if err != nil {
+		return nil, InternalServerError
+	}
+	return employees, Success
+}
+
+func (u *Usecase) GetEmployeePosition(accountId string) (*models.GetEmployeePositionOutput, ErrorCode) {
+	employees, err := u.services.Organization.GetEmployeePosition(accountId)
+	if err != nil {
+		return nil, InternalServerError
+	}
+	return employees, Success
+}
+
 func (u *Usecase) GetEmployeeById(employeeId string) (*models.Employee, ErrorCode) {
 	employee, err := u.services.Organization.GetEmployeeById(employeeId)
 	if err != nil {
@@ -62,6 +79,14 @@ func (u *Usecase) GetEmployeeById(employeeId string) (*models.Employee, ErrorCod
 
 func (u *Usecase) GetDepartmentByEmployeeId(employeeId string) (*models.Department, ErrorCode) {
 	employee, err := u.services.Organization.GetDepartmentByEmployeeId(employeeId)
+	if err != nil {
+		return nil, InternalServerError
+	}
+	return employee, Success
+}
+
+func (u *Usecase) GetDepartmentPosition(accountId string) (*models.GetDepartmentPositionOutput, ErrorCode) {
+	employee, err := u.services.Organization.GetDepartmentPosition(accountId)
 	if err != nil {
 		return nil, InternalServerError
 	}
@@ -86,6 +111,26 @@ func (u *Usecase) CreateEmployee(accountId string, input *models.CreateEmployeeI
 	return Success
 }
 
+func (u *Usecase) CreatePosition(input *models.CreatePositionInput) ErrorCode {
+	err := u.services.Organization.CreatePosition(input)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}
+
+func (u *Usecase) CreateDepartment(accountId string, input *models.CreateDepartmentInput) ErrorCode {
+	err := u.services.Organization.CreateDepartment(accountId, input)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}
+
 func (u *Usecase) UpdateEmployee(input *models.Employee) ErrorCode {
 	err := u.services.Organization.UpdateEmployee(input)
 	if err != nil {
@@ -96,8 +141,38 @@ func (u *Usecase) UpdateEmployee(input *models.Employee) ErrorCode {
 	return Success
 }
 
+func (u *Usecase) UpdatePositionById(input *models.UpdatePositionInput) ErrorCode {
+	err := u.services.Organization.UpdatePositionById(input)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}
+
+func (u *Usecase) UpdateDepartmentById(accountId string, input *models.UpdateDepartmentInput) ErrorCode {
+	err := u.services.Organization.UpdateDepartmentById(accountId, input)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}
+
 func (u *Usecase) UpdateAccount(input *models.Account) ErrorCode {
 	err := u.services.Organization.UpdateAccount(input)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}
+
+func (u *Usecase) DeleteEmployeeById(employeeId string) ErrorCode {
+	err := u.services.Organization.DeleteEmployeeById(employeeId)
 	if err != nil {
 		logrus.Error(err)
 		return InternalServerError

@@ -55,6 +55,14 @@ type Organization interface {
 	UpdateAccount(input *models.Account) error
 	UpdateEmployeeDepartment(input *models.UpdateEmployeeDepartment) error
 	UpdateEmployeePosition(input *models.UpdateEmployeePosition) error
+	GetEmployeeDepartment(accountId string) (*models.GetEmployeeDepartmentOutput, error)
+	GetEmployeePosition(accountId string) (*models.GetEmployeePositionOutput, error)
+	DeleteEmployeeById(employeeId string) error
+	GetDepartmentPosition(accountId string) (*models.GetDepartmentPositionOutput, error)
+	CreatePosition(input *models.CreatePositionInput) error
+	CreateDepartment(accountID string, input *models.CreateDepartmentInput) error
+	UpdatePositionById(input *models.UpdatePositionInput) error
+	UpdateDepartmentById(accountId string, input *models.UpdateDepartmentInput) error
 }
 
 type Repository struct {

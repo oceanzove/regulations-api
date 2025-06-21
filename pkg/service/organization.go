@@ -49,8 +49,24 @@ func (o *OrganizationService) CreateEmployee(accountId string, input *models.Cre
 	return o.repo.CreateEmployee(input)
 }
 
+func (o *OrganizationService) CreatePosition(input *models.CreatePositionInput) error {
+	return o.repo.CreatePosition(input)
+}
+
+func (o *OrganizationService) CreateDepartment(accountId string, input *models.CreateDepartmentInput) error {
+	return o.repo.CreateDepartment(accountId, input)
+}
+
 func (o *OrganizationService) UpdateEmployee(input *models.Employee) error {
 	return o.repo.UpdateEmployee(input)
+}
+
+func (o *OrganizationService) UpdatePositionById(input *models.UpdatePositionInput) error {
+	return o.repo.UpdatePositionById(input)
+}
+
+func (o *OrganizationService) UpdateDepartmentById(accountId string, input *models.UpdateDepartmentInput) error {
+	return o.repo.UpdateDepartmentById(accountId, input)
 }
 
 func (o *OrganizationService) UpdateAccount(input *models.Account) error {
@@ -63,4 +79,20 @@ func (o *OrganizationService) UpdateEmployeeDepartment(input *models.UpdateEmplo
 
 func (o *OrganizationService) UpdateEmployeePosition(input *models.UpdateEmployeePosition) error {
 	return o.repo.UpdateEmployeePosition(input)
+}
+
+func (o *OrganizationService) GetEmployeeDepartment(accountId string) (*models.GetEmployeeDepartmentOutput, error) {
+	return o.repo.GetEmployeeDepartment(accountId)
+}
+
+func (o *OrganizationService) GetEmployeePosition(accountId string) (*models.GetEmployeePositionOutput, error) {
+	return o.repo.GetEmployeePosition(accountId)
+}
+
+func (o *OrganizationService) DeleteEmployeeById(employeeId string) error {
+	return o.repo.DeleteEmployeeById(employeeId)
+}
+
+func (o *OrganizationService) GetDepartmentPosition(accountId string) (*models.GetDepartmentPositionOutput, error) {
+	return o.repo.GetDepartmentPosition(accountId)
 }

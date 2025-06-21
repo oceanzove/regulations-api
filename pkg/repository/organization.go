@@ -36,6 +36,54 @@ func (t *OrganizationPostgres) GetDepartments(accountId string) (*models.GetDepa
 	return &output, nil
 }
 
+func (t *OrganizationPostgres) GetEmployeeDepartment(accountId string) (*models.GetEmployeeDepartmentOutput, error) {
+	var output models.GetEmployeeDepartmentOutput
+
+	err := t.db.Select(&output.EmployeeDepartment, `
+		SELECT DISTINCT ed.employee_id, ed.department_id
+		FROM "EmployeeDepartment" ed
+		JOIN "Department" d ON ed.department_id = d.id
+		WHERE d.organization_id = (
+    	SELECT d2.organization_id
+    	FROM "EmployeeDepartment" ed2
+    	JOIN "Department" d2 ON ed2.department_id = d2.id
+    	WHERE ed2.employee_id = $1
+    	LIMIT 1
+	);
+	`, accountId)
+	if err != nil {
+		logrus.Error(err.Error())
+		return nil, err
+	}
+
+	return &output, nil
+}
+
+func (t *OrganizationPostgres) GetEmployeePosition(accountId string) (*models.GetEmployeePositionOutput, error) {
+	var output models.GetEmployeePositionOutput
+
+	err := t.db.Select(&output.EmployeePosition, `
+	SELECT ep."employee_id", ep."position_id"
+	FROM "EmployeePosition" ep
+	JOIN "Employee" e ON ep."employee_id" = e."id"
+	JOIN "EmployeeDepartment" ed ON e."id" = ed."employee_id"
+	JOIN "Department" d ON ed."department_id" = d."id"
+	JOIN "Organization" o ON d."organization_id" = o."id"
+	WHERE o."id" = (
+		SELECT d."organization_id"
+		FROM "Department" d
+		JOIN "EmployeeDepartment" ed ON d."id" = ed."department_id"
+		WHERE ed."employee_id" = $1
+	)
+	`, accountId)
+	if err != nil {
+		logrus.Error(err.Error())
+		return nil, err
+	}
+
+	return &output, nil
+}
+
 func (t *OrganizationPostgres) GetDepartmentByID(accountId string, departmentId string) (*models.Department, error) {
 	var output models.Department
 
@@ -190,6 +238,116 @@ func (t *OrganizationPostgres) CreateEmployee(input *models.CreateEmployeeInput)
 	return nil
 }
 
+func (t *OrganizationPostgres) CreatePosition(input *models.CreatePositionInput) error {
+	tx, err := t.db.Beginx()
+	if err != nil {
+		logrus.Error("failed to begin transaction:", err)
+		return err
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			logrus.Error("panic recovered:", r)
+		}
+	}()
+
+	// 1. Insert Position
+	_, err = tx.Exec(`
+		INSERT INTO "Position" (
+			id, name
+		) VALUES ($1, $2)
+	`,
+		input.ID,
+		input.Name,
+	)
+	if err != nil {
+		tx.Rollback()
+		logrus.Error("failed to insert Position:", err)
+		return err
+	}
+
+	// 2. Insert DepartmentPosition
+	_, err = tx.Exec(`
+		INSERT INTO "DepartmentPosition" (
+			department_id, position_id
+		) VALUES ($1, $2)
+	`,
+		input.DepartmentID,
+		input.ID,
+	)
+	if err != nil {
+		tx.Rollback()
+		logrus.Error("failed to insert DepartmentPosition:", err)
+		return err
+	}
+
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		logrus.Error("failed to commit transaction:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (t *OrganizationPostgres) CreateDepartment(accountID string, input *models.CreateDepartmentInput) error {
+	tx, err := t.db.Beginx()
+	if err != nil {
+		logrus.Error("failed to begin transaction:", err)
+		return err
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			logrus.Error("panic recovered:", r)
+		}
+	}()
+
+	var organization models.Organization
+
+	err = t.db.Get(&organization, `
+		SELECT o.*
+		FROM "Organization" o
+	JOIN "Department" d ON d.organization_id = o.id
+	JOIN "EmployeeDepartment" ed ON ed.department_id = d.id
+	JOIN "Employee" e ON e.id = ed.employee_id
+	WHERE e.id = $1
+	LIMIT 1;
+	`, accountID)
+
+	// 1. Insert Department
+	_, err = tx.Exec(`
+		INSERT INTO "Department" (
+			id, name, organization_id
+		) VALUES ($1, $2, $3)
+	`,
+		input.ID,
+		input.Name,
+		organization.ID,
+	)
+	if err != nil {
+		tx.Rollback()
+		logrus.Error("failed to insert Department:", err)
+		return err
+	}
+
+	if err != nil {
+		tx.Rollback()
+		logrus.Error("failed to insert DepartmentPosition:", err)
+		return err
+	}
+
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		logrus.Error("failed to commit transaction:", err)
+		return err
+	}
+
+	return nil
+}
+
 func (t *OrganizationPostgres) GetEmployeeById(employeeId string) (*models.Employee, error) {
 	var output models.Employee
 
@@ -265,16 +423,41 @@ func (t *OrganizationPostgres) GetEmployees(accountId string) (*models.GetEmploy
 	return &output, nil
 }
 
+func (t *OrganizationPostgres) GetDepartmentPosition(accountId string) (*models.GetDepartmentPositionOutput, error) {
+	var output models.GetDepartmentPositionOutput
+
+	err := t.db.Select(&output.DepartmentPosition, `
+			SELECT dp.*
+		FROM "DepartmentPosition" dp
+		JOIN "Department" d ON d.id = dp.department_id
+		WHERE d.organization_id = (
+			SELECT dep.organization_id
+			FROM "EmployeeDepartment" ed
+			JOIN "Department" dep ON dep.id = ed.department_id
+			WHERE ed.employee_id = $1
+			LIMIT 1
+		)
+	`, accountId)
+	if err != nil {
+		logrus.Error(err.Error())
+		return nil, err
+	}
+
+	return &output, nil
+}
+
 func (t *OrganizationPostgres) UpdateEmployee(input *models.Employee) error {
 	_, err := t.db.Exec(`UPDATE "Employee" SET
-                      full_name = $1,
-                      phone_number = $2,
-                      birth_date = $3,
-                      employment_date = $4,
-                      residential_address = $5,
-                      marital_status = $6,
-                      email = $7
-                      WHERE Id = $8`,
+                      Id = $1,
+                      full_name = $2,
+                      phone_number = $3,
+                      birth_date = $4,
+                      employment_date = $5,
+                      residential_address = $6,
+                      marital_status = $7,
+                      email = $8
+                      WHERE Id = $1`,
+		input.ID,
 		input.FullName,
 		input.PhoneNumber,
 		input.BirthDate,
@@ -282,7 +465,62 @@ func (t *OrganizationPostgres) UpdateEmployee(input *models.Employee) error {
 		input.ResidentialAddress,
 		input.MaritalStatus,
 		input.Email,
+	)
+	if err != nil {
+		logrus.Error(err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (t *OrganizationPostgres) UpdatePositionById(input *models.UpdatePositionInput) error {
+	_, err := t.db.Exec(`UPDATE "Position" SET
+                      id = $1,
+                      name = $2
+                      WHERE id = $1`,
 		input.ID,
+		input.Name,
+	)
+
+	_, err = t.db.Exec(`
+		INSERT INTO "DepartmentPosition" (
+			department_id, position_id
+		) VALUES ($1, $2)
+	`,
+		input.DepartmentID,
+		input.ID,
+	)
+
+	if err != nil {
+		logrus.Error(err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (t *OrganizationPostgres) UpdateDepartmentById(accountId string, input *models.UpdateDepartmentInput) error {
+	var organization models.Organization
+
+	err := t.db.Get(&organization, `
+		SELECT o.*
+		FROM "Organization" o
+	JOIN "Department" d ON d.organization_id = o.id
+	JOIN "EmployeeDepartment" ed ON ed.department_id = d.id
+	JOIN "Employee" e ON e.id = ed.employee_id
+	WHERE e.id = $1
+	LIMIT 1;
+	`, accountId)
+
+	_, err = t.db.Exec(`UPDATE "Department" SET
+                      id = $1,
+                      name = $2,
+                      organization_id = $3
+                      WHERE id = $1`,
+		input.ID,
+		input.Name,
+		organization.ID,
 	)
 	if err != nil {
 		logrus.Error(err.Error())
@@ -336,6 +574,40 @@ func (t *OrganizationPostgres) UpdateEmployeePosition(input *models.UpdateEmploy
 	if err != nil {
 		logrus.Error(err.Error())
 		return err
+	}
+
+	return nil
+}
+
+func (t *OrganizationPostgres) DeleteEmployeeById(employeeId string) error {
+	tx, err := t.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			_ = tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
+	queries := []string{
+		`DELETE FROM "EmployeePosition" WHERE "employee_id" = $1`,
+		`DELETE FROM "EmployeeDepartment" WHERE "employee_id" = $1`,
+		`DELETE FROM "Account" WHERE "id" = $1`,
+		`DELETE FROM "Employee" WHERE "id" = $1`,
+	}
+
+	for _, query := range queries {
+		if _, execErr := tx.Exec(query, employeeId); execErr != nil {
+			err = execErr
+			return err
+		}
 	}
 
 	return nil

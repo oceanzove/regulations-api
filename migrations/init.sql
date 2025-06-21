@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS "Department"
     "organization_id" uuid         NOT NULL REFERENCES "Organization" ("id")
 );
 
+
+
 -- Таблица сотрудников
 CREATE TABLE IF NOT EXISTS "Employee"
 (

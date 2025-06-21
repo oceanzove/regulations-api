@@ -53,10 +53,15 @@ func (h *Handler) InitHTTPRoutes(config *models.ServerConfig) *gin.Engine {
 				employee.POST("", h.createEmployee)
 				employee.GET("", h.getEmployees)
 				employee.GET("/:employeeID", h.getEmployeeById)
+				employee.PUT("/:employeeID", h.updateEmployee)
+
+				employee.DELETE("/:employeeID", h.deleteEmployeeById)
 
 				department := employee.Group("/department")
 				{
 					department.GET("/:employeeID", h.getDepartmentByEmployeeId)
+
+					department.GET("", h.getEmployeeDepartment)
 
 					department.PUT("/:employeeID", h.updateEmployeeDepartment)
 				}
@@ -64,6 +69,8 @@ func (h *Handler) InitHTTPRoutes(config *models.ServerConfig) *gin.Engine {
 				position := employee.Group("/position")
 				{
 					position.GET("/:employeeID", h.getPositionByEmployeeId)
+
+					position.GET("", h.getEmployeePosition)
 
 					position.PUT("/:employeeID", h.updateEmployeePosition)
 				}
@@ -78,12 +85,22 @@ func (h *Handler) InitHTTPRoutes(config *models.ServerConfig) *gin.Engine {
 			department := organization.Group("/department")
 			{
 				department.GET("/:departmentID", h.getDepartmentById)
+
+				department.GET("/position", h.getDepartmentPosition)
+
 				department.GET("", h.getDepartments)
+
+				department.POST("", h.createDepartment)
+
+				department.PUT("/:departmentID", h.updateDepartmentById)
 			}
 			position := organization.Group("/position")
 			{
 				position.GET("", h.getPositions)
 				position.GET("/:departmentID", h.getPositionsByDepartment)
+
+				position.POST("", h.createPosition)
+				position.PUT("/:positionID", h.updatePositionById)
 			}
 		}
 		regulation := api.Group("/regulation", h.UserIdentityMiddleware)
