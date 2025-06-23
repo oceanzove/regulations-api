@@ -118,14 +118,19 @@ func (h *Handler) InitHTTPRoutes(config *models.ServerConfig) *gin.Engine {
 		{
 			process.GET("", h.getProcesses)
 			process.GET("/:processID", h.getProcessByID)
-			process.PUT("/:processID", h.updateProcess)
+			process.PUT("/:processID", h.updateProcessById)
 			process.POST("", h.createProcess)
 
 			process.POST("/step", h.createStep)
+			process.PUT("/step/:stepID", h.updateStepById)
 			process.GET("/:processID/step", h.getStepsByProcess)
 
-			process.POST("/:processID/regulation", h.linkRegulationToProcess)
+			process.POST("/:processID/regulation/link", h.linkRegulationToProcess)
+			process.POST("/:processID/regulation/unlink", h.unlinkRegulationToProcess)
 			process.GET("/:processID/regulation", h.getRegulationsByProcess)
+
+			process.DELETE("/:processID", h.deleteProcessById)
+			process.DELETE("/step/:stepID", h.deleteStepById)
 		}
 	}
 

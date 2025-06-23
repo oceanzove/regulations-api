@@ -74,10 +74,23 @@ func (t *ProcessPostgres) GetPrivate(accountId string) (*models.GetProcessesOutp
 	LIMIT 1
 	`, accountId)
 
-	err = t.db.Select(&output.Processes, `SELECT id, title, description FROM "Process" WHERE  responsible = $1`, departmentID)
-	if err != nil {
-		logrus.Error(err.Error())
-		return nil, err
+	var role string
+	err = t.db.Get(&role, `
+	SELECT role FROM "Account" WHERE id = $1
+	`, accountId)
+
+	if role == "administrator" {
+		err = t.db.Select(&output.Processes, `SELECT id, title, description FROM "Process"`)
+		if err != nil {
+			logrus.Error(err.Error())
+			return nil, err
+		}
+	} else {
+		err = t.db.Select(&output.Processes, `SELECT id, title, description FROM "Process" WHERE  responsible = $1`, departmentID)
+		if err != nil {
+			logrus.Error(err.Error())
+			return nil, err
+		}
 	}
 
 	return &output, nil
@@ -94,15 +107,40 @@ func (t *ProcessPostgres) GetByID(accountID, processID string) (*models.Process,
 	LIMIT 1
 	`, accountID)
 
-	err = t.db.Get(&process, `SELECT * FROM "Process" WHERE id=$1 AND responsible=$2`, processID, departmentID)
-	if err != nil {
-		return nil, err
+	var role string
+	err = t.db.Get(&role, `
+	SELECT role FROM "Account" WHERE id = $1
+	`, accountID)
+
+	if role == "administrator" {
+		err = t.db.Get(&process, `SELECT * FROM "Process" WHERE id=$1`, processID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err = t.db.Get(&process, `SELECT * FROM "Process" WHERE id=$1 AND responsible=$2`, processID, departmentID)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	return &process, nil
 }
 
-func (t *ProcessPostgres) UpdatePrivate(input *models.UpdateProcessInput, accountId string) error {
-	_, err := t.db.Exec(`UPDATE "Process" SET title = $1, description = $2 WHERE  id = $3 AND account_id = $4`, input.Title, input.Description, input.ID, accountId)
+func (t *ProcessPostgres) UpdatePrivate(input *models.UpdateProcessInput) error {
+	_, err := t.db.Exec(`UPDATE "Process" SET title = $1, description = $2, responsible = $3 WHERE  id = $4`,
+		input.Title, input.Description, input.Responsible, input.ID)
+	if err != nil {
+		logrus.Error(err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (t *ProcessPostgres) UpdateStepById(input *models.Step) error {
+	_, err := t.db.Exec(`UPDATE "Step" SET name = $1, description = $2, responsible_id = $3, "order" = $4 WHERE  id = $5`,
+		input.Name, input.Description, input.Responsible, input.Order, input.ID)
 	if err != nil {
 		logrus.Error(err.Error())
 		return err
@@ -116,6 +154,13 @@ func (t *ProcessPostgres) LinkRegulationToProcess(processID, regulationID string
 		INSERT INTO "ProcessRegulation" (process_id, regulation_id)
 		VALUES ($1, $2)
 		ON CONFLICT DO NOTHING
+	`, processID, regulationID)
+	return err
+}
+
+func (t *ProcessPostgres) UnlinkRegulationToProcess(processID, regulationID string) error {
+	_, err := t.db.Exec(`
+		DELETE FROM "ProcessRegulation" WHERE process_id = $1 AND regulation_id = $2
 	`, processID, regulationID)
 	return err
 }
@@ -168,4 +213,18 @@ func (t *ProcessPostgres) GetRegulationsByProcess(processID string) ([]*models.R
 	}
 
 	return regulations, nil
+}
+
+func (t *ProcessPostgres) DeleteProcessById(processId string) error {
+	_, err := t.db.Exec(`
+		DELETE FROM "Process" WHERE id = $1
+	`, processId)
+	return err
+}
+
+func (t *ProcessPostgres) DeleteStepById(stepId string) error {
+	_, err := t.db.Exec(`
+		DELETE FROM "Step" WHERE id = $1
+	`, stepId)
+	return err
 }

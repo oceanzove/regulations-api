@@ -33,8 +33,18 @@ func (u *Usecase) GetProcessByID(accountID, processID string) (*models.Process, 
 	return process, Success
 }
 
-func (u *Usecase) UpdateProcess(input *models.UpdateProcessInput, accountId string) ErrorCode {
-	err := u.services.Process.UpdatePrivate(input, accountId)
+func (u *Usecase) UpdateProcess(input *models.UpdateProcessInput) ErrorCode {
+	err := u.services.Process.UpdatePrivate(input)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}
+
+func (u *Usecase) UpdateStepById(input *models.Step) ErrorCode {
+	err := u.services.Process.UpdateStepById(input)
 	if err != nil {
 		logrus.Error(err)
 		return InternalServerError
@@ -45,6 +55,15 @@ func (u *Usecase) UpdateProcess(input *models.UpdateProcessInput, accountId stri
 
 func (u *Usecase) LinkRegulationToProcess(processID, regulationID string) ErrorCode {
 	err := u.services.Process.LinkRegulationToProcess(processID, regulationID)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+	return Success
+}
+
+func (u *Usecase) UnlinkRegulationToProcess(processID, regulationID string) ErrorCode {
+	err := u.services.Process.UnlinkRegulationToProcess(processID, regulationID)
 	if err != nil {
 		logrus.Error(err)
 		return InternalServerError
@@ -66,5 +85,25 @@ func (u *Usecase) CreateStep(input *models.Step) ErrorCode {
 		logrus.Error(err)
 		return InternalServerError
 	}
+	return Success
+}
+
+func (u *Usecase) DeleteProcessById(processId string) ErrorCode {
+	err := u.services.Process.DeleteProcessById(processId)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}
+
+func (u *Usecase) DeleteStepById(stepId string) ErrorCode {
+	err := u.services.Process.DeleteStepById(stepId)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
 	return Success
 }

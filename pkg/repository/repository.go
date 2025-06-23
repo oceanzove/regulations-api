@@ -29,12 +29,16 @@ type Regulation interface {
 type Process interface {
 	GetPrivate(accountId string) (*models.GetProcessesOutput, error)
 	GetByID(accountId string, processId string) (*models.Process, error)
-	UpdatePrivate(input *models.UpdateProcessInput, accountId string) error
+	UpdatePrivate(input *models.UpdateProcessInput) error
 	Create(accountId string, input *models.CreateProcessInput) error
-	LinkRegulationToProcess(accountId string, processId string) error
+	LinkRegulationToProcess(processID, regulationID string) error
+	UnlinkRegulationToProcess(processID, regulationID string) error
 	CreateStep(input *models.Step) error
 	GetStepsByProcess(processId string) ([]*models.Step, error)
 	GetRegulationsByProcess(processId string) ([]*models.Regulation, error)
+	DeleteProcessById(processId string) error
+	UpdateStepById(input *models.Step) error
+	DeleteStepById(stepId string) error
 }
 
 type Step interface {

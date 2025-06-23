@@ -20,6 +20,7 @@ type UpdateProcessInput struct {
 	ID          string
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	Responsible string `json:"responsible"`
 }
 
 type CreateProcessInput struct {
