@@ -99,6 +99,76 @@ func (h *Handler) getRegulationByID(c *gin.Context) {
 	h.sendResponseSuccess(c, regulation, usecase.Success)
 }
 
+func (h *Handler) getSectionById(c *gin.Context) {
+	regulationID := c.Param("regulationID")
+
+	regulation, regulationStatus := h.usecase.GetSectionById(regulationID)
+	if regulationStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+	h.sendResponseSuccess(c, regulation, usecase.Success)
+}
+
+func (h *Handler) deleteRegulationById(c *gin.Context) {
+	regulationID := c.Param("regulationID")
+
+	processStatus := h.usecase.DeleteRegulationById(regulationID)
+	if processStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, processStatus)
+		return
+	}
+}
+
+func (h *Handler) linkSectionToRegulation(c *gin.Context) {
+	accountID := c.GetString(gin.AuthUserKey)
+	if accountID == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	regulationID := c.Param("regulationID")
+	var input *models.LinkSectionToRegulation
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+	input.RegulationID = regulationID
+
+	linkStatus := h.usecase.LinkSectionToRegulation(input)
+	if linkStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, linkStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, nil, usecase.Success)
+}
+
+func (h *Handler) unlinkSectionToRegulation(c *gin.Context) {
+	accountID := c.GetString(gin.AuthUserKey)
+	if accountID == "" {
+		h.sendResponseSuccess(c, nil, usecase.InternalServerError)
+		return
+	}
+
+	regulationID := c.Param("regulationID")
+	var input struct {
+		SectionID string `json:"sectionId" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil || input.SectionID == "" {
+		h.sendResponseSuccess(c, nil, usecase.BadRequest)
+		return
+	}
+
+	linkStatus := h.usecase.UnlinkSectionToRegulation(regulationID, input.SectionID)
+	if linkStatus != usecase.Success {
+		h.sendResponseSuccess(c, nil, linkStatus)
+		return
+	}
+
+	h.sendResponseSuccess(c, nil, usecase.Success)
+}
+
 func (h *Handler) updateRegulation(c *gin.Context) {
 	var input models.UpdateRegulationInput
 	if err := c.ShouldBindJSON(&input); err != nil {

@@ -25,6 +25,16 @@ func (u *Usecase) CreateSection(accountId string, input *models.CreateSectionInp
 	return Success
 }
 
+func (u *Usecase) DeleteRegulationById(regulationId string) ErrorCode {
+	err := u.services.Regulation.DeleteRegulationById(regulationId)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+
+	return Success
+}
+
 func (u *Usecase) GetRegulation(accountId string) (*models.GetRegulationsOutput, ErrorCode) {
 	output, err := u.services.Regulation.GetPrivate(accountId)
 	if err != nil {
@@ -43,6 +53,34 @@ func (u *Usecase) GetSections(accountId string) (*models.GetSectionsOutput, Erro
 	}
 
 	return output, Success
+}
+
+func (u *Usecase) GetSectionById(regulationId string) (*models.GetSectionByRegulationOutput, ErrorCode) {
+	output, err := u.services.Regulation.GetSectionById(regulationId)
+	if err != nil {
+		logrus.Error(err)
+		return nil, InternalServerError
+	}
+
+	return output, Success
+}
+
+func (u *Usecase) LinkSectionToRegulation(input *models.LinkSectionToRegulation) ErrorCode {
+	err := u.services.Regulation.LinkSectionToRegulation(input)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+	return Success
+}
+
+func (u *Usecase) UnlinkSectionToRegulation(regulationID, sectionID string) ErrorCode {
+	err := u.services.Regulation.UnlinkSectionToRegulation(regulationID, sectionID)
+	if err != nil {
+		logrus.Error(err)
+		return InternalServerError
+	}
+	return Success
 }
 
 func (u *Usecase) GetRegulationByID(accountID, regulationID string) (*models.Regulation, ErrorCode) {

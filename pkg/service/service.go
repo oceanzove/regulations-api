@@ -21,6 +21,10 @@ type Regulation interface {
 	Create(accountId string, input *models.CreateRegulationInput) error
 	CreateSection(accountId string, input *models.CreateSectionInput) error
 	GetSections(accountId string) (*models.GetSectionsOutput, error)
+	DeleteRegulationById(regulationId string) error
+	LinkSectionToRegulation(input *models.LinkSectionToRegulation) error
+	UnlinkSectionToRegulation(regulationID, sectionID string) error
+	GetSectionById(regulationId string) (*models.GetSectionByRegulationOutput, error)
 }
 
 type Process interface {

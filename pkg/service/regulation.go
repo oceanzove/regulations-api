@@ -42,7 +42,23 @@ func (o *RegulationService) GetByID(accountID, regulationID string) (*models.Reg
 }
 
 func (o *RegulationService) UpdatePrivate(input models.UpdateRegulationInput, accountId string) error {
-	return o.repo.UpdatePrivate(input, accountId)
+	return o.repo.UpdatePrivate(input)
+}
+
+func (o *RegulationService) DeleteRegulationById(regulationId string) error {
+	return o.repo.DeleteRegulationById(regulationId)
+}
+
+func (o *RegulationService) GetSectionById(regulationId string) (*models.GetSectionByRegulationOutput, error) {
+	return o.repo.GetSectionById(regulationId)
+}
+
+func (o *RegulationService) LinkSectionToRegulation(input *models.LinkSectionToRegulation) error {
+	return o.repo.LinkSectionToRegulation(input)
+}
+
+func (o *RegulationService) UnlinkSectionToRegulation(regulationID, sectionID string) error {
+	return o.repo.UnlinkSectionToRegulation(regulationID, sectionID)
 }
 
 //func (o *OfferService) Create(input *models.OfferCreateInput, email string) (*models.OfferCreateOutput, error) {

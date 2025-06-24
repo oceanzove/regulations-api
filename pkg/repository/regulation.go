@@ -179,14 +179,51 @@ func (t *RegulationPostgres) GetSections(accountID string) (*models.GetSectionsO
 	return &output, nil
 }
 
-func (t *RegulationPostgres) UpdatePrivate(input models.UpdateRegulationInput, email string) error {
-	_, err := t.db.Exec(`UPDATE "Regulation" SET title = $1, content = $2 WHERE  id = $3 AND account_id = $4`, input.Title, input.Content, input.ID, email)
+func (t *RegulationPostgres) UpdatePrivate(input models.UpdateRegulationInput) error {
+	_, err := t.db.Exec(`UPDATE "Regulation" SET title = $1, content = $2 WHERE  id = $3`, input.Title, input.Content, input.ID)
 	if err != nil {
 		logrus.Error(err.Error())
 		return err
 	}
 
 	return nil
+}
+
+func (t *RegulationPostgres) DeleteRegulationById(regulationId string) error {
+	_, err := t.db.Exec(`
+		DELETE FROM "Regulation" WHERE id = $1
+	`, regulationId)
+	return err
+}
+
+func (t *RegulationPostgres) LinkSectionToRegulation(input *models.LinkSectionToRegulation) error {
+
+	_, err := t.db.Exec(`
+		INSERT INTO "RegulationSection" (id, regulation_id, section_id, "order")
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT DO NOTHING
+	`, input.ID, input.RegulationID, input.SectionID, input.Order)
+	logrus.Error(err)
+	return err
+}
+
+func (t *RegulationPostgres) UnlinkSectionToRegulation(regulationID, sectionID string) error {
+	_, err := t.db.Exec(`
+		DELETE FROM "RegulationSection" WHERE regulation_id = $1 AND section_id = $2
+	`, regulationID, sectionID)
+	return err
+}
+
+func (t *RegulationPostgres) GetSectionById(regulationID string) (*models.GetSectionByRegulationOutput, error) {
+	var output models.GetSectionByRegulationOutput
+
+	err := t.db.Select(&output.SectionIDs, `SELECT section_id FROM "RegulationSection" WHERE regulation_id = $1`, regulationID)
+	if err != nil {
+		logrus.Error(err.Error())
+		return nil, err
+	}
+
+	return &output, nil
 }
 
 //func (t *OfferPostgres) Create(input *models.OfferCreateInput, email string) (*models.OfferCreateOutput, error) {

@@ -7,6 +7,13 @@ type Regulation struct {
 	DepartmentID string `json:"departmentId" db:"department_id"`
 }
 
+type LinkSectionToRegulation struct {
+	ID           string `json:"id" binding:"required,uuid"`
+	SectionID    string `json:"sectionId" binding:"required,uuid"`
+	RegulationID string `json:"regulationId"`
+	Order        int    `json:"order"`
+}
+
 type Section struct {
 	ID        string `json:"id" db:"id"`
 	Title     string `json:"title" db:"title"`
@@ -22,6 +29,10 @@ type GetRegulationsOutput struct {
 
 type GetSectionsOutput struct {
 	Sections []Section `json:"sections"`
+}
+
+type GetSectionByRegulationOutput struct {
+	SectionIDs []string `json:"sectionsIds"`
 }
 
 type UpdateRegulationInput struct {
